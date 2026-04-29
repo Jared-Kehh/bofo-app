@@ -1,0 +1,224 @@
+.dashboard { display: flex; flex-direction: column; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-bottom: var(--border);
+}
+
+.stat {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-right: var(--border);
+}
+
+.stat:last-child { border-right: none; }
+
+.statVal {
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--gray-900);
+  letter-spacing: -0.02em;
+}
+
+.statLabel {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+}
+
+.statPending .statVal { color: var(--pending-text); }
+.statApproved .statVal { color: var(--approved-text); }
+.statCompleted .statVal { color: var(--gray-500); }
+
+.filters {
+  padding: 16px 20px;
+  border-bottom: var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.search {
+  width: 100%;
+  padding: 9px 12px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-900);
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+.search:focus { border-color: var(--gray-900); }
+.search::placeholder { color: var(--gray-400); }
+
+.filterRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.selectWrap { position: relative; }
+
+.selectWrap::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--gray-400);
+  pointer-events: none;
+}
+
+.selectWrap select {
+  width: 100%;
+  padding: 8px 28px 8px 10px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-700);
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+
+.selectWrap select:focus { border-color: var(--gray-900); }
+
+.empty {
+  padding: 48px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  border-bottom: var(--border);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.empName {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+.siteName {
+  display: block;
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-top: 1px;
+}
+
+.pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pending  { background: var(--pending-bg);   color: var(--pending-text); }
+.approved { background: var(--approved-bg);  color: var(--approved-text); }
+.completed{ background: var(--completed-bg); color: var(--completed-text); }
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.metaLabel {
+  font-size: 11px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.metaVal {
+  font-size: 12px;
+  color: var(--gray-700);
+  text-align: right;
+}
+
+.metaTime {
+  font-size: 11px;
+  color: var(--gray-400);
+  text-align: right;
+}
+
+.cardFooter {
+  display: flex;
+  gap: 6px;
+}
+
+.actionBtn {
+  padding: 6px 12px;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 400;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.actionBtn:hover:not(:disabled) {
+  border-color: var(--gray-400);
+  color: var(--gray-900);
+}
+
+.actionBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.actionApprove { color: var(--approved-text); border-color: var(--approved-bg); background: var(--approved-bg); }
+.actionApprove:hover:not(:disabled) { border-color: var(--approved-text); }
+
+.actionComplete { color: var(--gray-500); }
