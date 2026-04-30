@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { EMPLOYEES, JOB_SITES, BRANDS, TOOLS } from '../constants';
+import { EMPLOYEES, JOB_SITES, BRANDS } from '../constants';
 import s from './RequestForm.module.css';
 
 export default function RequestForm({ lang: t, onSubmitted }) {
   const [form, setForm] = useState({
     employeeName: '', jobSite: '', requestType: '',
-    brand: '', product: '', tool: '', description: '', quantity: '', notes: ''
+    brand: '', product: '', tool: '', description: '', quantity: '',
+    neededBy: '', priority: 'normal', notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -38,6 +39,8 @@ export default function RequestForm({ lang: t, onSubmitted }) {
           requestType: form.requestType,
           details,
           quantity: form.quantity || null,
+          neededBy: form.neededBy || null,
+          priority: form.priority,
           notes: form.notes
         })
       });
@@ -121,7 +124,7 @@ export default function RequestForm({ lang: t, onSubmitted }) {
               <div className={s.selectWrap}>
                 <select value={form.tool} onChange={e => set('tool', e.target.value)}>
                   <option value="">{t.selectTool}</option>
-                  {TOOLS.map(tool => <option key={tool}>{tool}</option>)}
+                  {t.tools.map(tool => <option key={tool}>{tool}</option>)}
                 </select>
               </div>
             </div>
@@ -144,6 +147,35 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
           </div>
         )}
+      </div>
+
+      <div className={s.section}>
+        <label className={s.label}>{t.neededBy}</label>
+        <input
+          type="text"
+          value={form.neededBy}
+          onChange={e => set('neededBy', e.target.value)}
+          placeholder={t.neededByPlaceholder}
+        />
+      </div>
+
+      <div className={s.section}>
+        <label className={s.label}>{t.priority}</label>
+        <div className={s.typeGrid}>
+          {[
+            { val: 'normal', label: t.priorityNormal },
+            { val: 'urgent', label: t.priorityUrgent },
+          ].map(opt => (
+            <button
+              key={opt.val}
+              type="button"
+              className={`${s.typeBtn} ${form.priority === opt.val ? s.typeBtnSel : ''}`}
+              onClick={() => set('priority', opt.val)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className={s.section}>

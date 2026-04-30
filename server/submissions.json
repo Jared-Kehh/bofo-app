@@ -1,29 +1,3 @@
 [
-  {
-    "id": "1777431749247",
-    "employeeName": "Andres Navarro",
-    "jobSite": "Site D – Evergreen Park",
-    "requestType": "material",
-    "details": {
-      "brand": "Sika",
-      "product": "sika pipes"
-    },
-    "quantity": "1",
-    "notes": "silver, not copper",
-    "status": "Pending",
-    "timestamp": "2026-04-29T03:02:29.247Z"
-  },
-  {
-    "id": "1777386997104",
-    "employeeName": "Carlos Mendez",
-    "jobSite": "Site B – Cicero",
-    "requestType": "tool",
-    "details": {
-      "tool": "Heat Gun"
-    },
-    "quantity": "10",
-    "notes": "",
-    "status": "Pending",
-    "timestamp": "2026-04-28T14:36:37.104Z"
-  }
+  
 ]

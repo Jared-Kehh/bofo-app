@@ -51,6 +51,12 @@ export const LANG = {
     pendingCount: 'Pending',
     approvedCount: 'Approved',
     completedCount: 'Completed',
+    tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer'],
+    neededBy: 'Needed by',
+    neededByPlaceholder: 'e.g. ASAP, Friday, end of week...',
+    priority: 'Priority',
+    priorityUrgent: 'Urgent',
+    priorityNormal: 'Normal',
   },
   es: {
     appSub: 'Bofo Waterproofing Systems',
@@ -104,6 +110,12 @@ export const LANG = {
     pendingCount: 'Pendientes',
     approvedCount: 'Aprobados',
     completedCount: 'Completados',
+    tools: ['Pistola de sellado', 'Pistola de calor', 'Mezclador / Taladro', 'Llana dentada', 'Rodillo', 'Rociador', 'Amoladora', 'Hidrolavadora'],
+    neededBy: 'Necesito para',
+    neededByPlaceholder: 'ej. Lo antes posible, viernes, fin de semana...',
+    priority: 'Prioridad',
+    priorityUrgent: 'Urgente',
+    priorityNormal: 'Normal',
   }
 };
 
