@@ -1,3 +1,4 @@
 /client/.env.production
 /client/.env.development
 /client/node_modules
+/server/node_modules
