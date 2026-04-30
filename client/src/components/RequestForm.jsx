@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EMPLOYEES, JOB_SITES, BRANDS } from '../constants';
+import { createSubmission } from '../api';
 import s from './RequestForm.module.css';
 
 export default function RequestForm({ lang: t, onSubmitted }) {
@@ -30,22 +31,17 @@ export default function RequestForm({ lang: t, onSubmitted }) {
     else details = { description: form.description };
 
     try {
-      const res = await fetch('/api/submissions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employeeName: form.employeeName,
-          jobSite: form.jobSite,
-          requestType: form.requestType,
-          details,
-          quantity: form.quantity || null,
-          neededBy: form.neededBy || null,
-          priority: form.priority,
-          notes: form.notes
-        })
+      const submission = await createSubmission({
+        employeeName: form.employeeName,
+        jobSite: form.jobSite,
+        requestType: form.requestType,
+        details,
+        quantity: form.quantity || null,
+        neededBy: form.neededBy || null,
+        priority: form.priority,
+        notes: form.notes
       });
-      if (!res.ok) throw new Error();
-      onSubmitted(await res.json());
+      onSubmitted(submission);
     } catch {
       setError(t.errorMsg);
     } finally {

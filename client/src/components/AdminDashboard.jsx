@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { JOB_SITES } from '../constants';
+import { getSubmissions, updateStatus as apiUpdateStatus } from '../api';
 import s from './AdminDashboard.module.css';
 
 const STATUS_LABELS = { Pending: 'pending', Approved: 'approved', Completed: 'completed' };
@@ -27,8 +28,7 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch('/api/submissions')
-      .then(r => r.json())
+    getSubmissions()
       .then(data => { setSubmissions(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [refreshKey]);
@@ -36,11 +36,7 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
   const updateStatus = async (id, status) => {
     setUpdating(id);
     try {
-      await fetch(`/api/submissions/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
+      await apiUpdateStatus(id, status);
       setSubmissions(prev => prev.map(x => x.id === id ? { ...x, status } : x));
     } finally {
       setUpdating(null);
@@ -138,6 +134,18 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
                   <div className={s.metaRow}>
                     <span className={s.metaLabel}>{t.qty}</span>
                     <span className={s.metaVal}>{sub.quantity}</span>
+                  </div>
+                )}
+                {sub.priority && sub.priority === 'urgent' && (
+                  <div className={s.metaRow}>
+                    <span className={s.metaLabel}>{t.priority}</span>
+                    <span className={s.urgentBadge}>{t.priorityUrgent}</span>
+                  </div>
+                )}
+                {sub.neededBy && (
+                  <div className={s.metaRow}>
+                    <span className={s.metaLabel}>{t.neededBy}</span>
+                    <span className={s.metaVal}>{sub.neededBy}</span>
                   </div>
                 )}
                 {sub.notes && (

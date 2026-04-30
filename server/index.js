@@ -7,7 +7,17 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const DATA_FILE = path.join(__dirname, 'submissions.json');
 
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json());
 
 // Initialize submissions file if it doesn't exist
@@ -35,7 +45,7 @@ app.get('/api/submissions', (req, res) => {
 
 // POST a new submission
 app.post('/api/submissions', (req, res) => {
-  const { employeeName, jobSite, requestType, details, quantity, notes } = req.body;
+  const { employeeName, jobSite, requestType, details, quantity, notes, neededBy, priority } = req.body;
 
   if (!employeeName || !jobSite || !requestType) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -50,6 +60,8 @@ app.post('/api/submissions', (req, res) => {
     requestType,
     details: details || {},
     quantity: quantity || null,
+    neededBy: neededBy || null,
+    priority: priority || 'normal',
     notes: notes || '',
     status: 'Pending',
     timestamp: new Date().toISOString()

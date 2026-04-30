@@ -51,7 +51,6 @@ export const LANG = {
     pendingCount: 'Pending',
     approvedCount: 'Approved',
     completedCount: 'Completed',
-    tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer'],
     neededBy: 'Needed by',
     neededByPlaceholder: 'e.g. ASAP, Friday, end of week...',
     priority: 'Priority',
