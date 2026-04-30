@@ -56,6 +56,7 @@ export const LANG = {
     priority: 'Priority',
     priorityUrgent: 'Urgent',
     priorityNormal: 'Normal',
+    tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer'],
   },
   es: {
     appSub: 'Bofo Waterproofing Systems',
