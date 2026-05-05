@@ -24,6 +24,7 @@ export const LANG = {
     selectSite: 'Select site...',
     selectBrand: 'Select brand...',
     selectTool: 'Select tool...',
+    selectProduct: 'Select product...',
     productPlaceholder: 'e.g. TREMproof 250GC',
     descPlaceholder: 'What do you need?',
     material: 'Material',
@@ -111,6 +112,7 @@ export const LANG = {
     approvedCount: 'Aprobados',
     completedCount: 'Completados',
     tools: ['Pistola de sellado', 'Pistola de calor', 'Mezclador / Taladro', 'Llana dentada', 'Rodillo', 'Rociador', 'Amoladora', 'Hidrolavadora'],
+    selectProduct: 'Selecciona producto...',
     neededBy: 'Necesito para',
     neededByPlaceholder: 'ej. Lo antes posible, viernes, fin de semana...',
     priority: 'Prioridad',
@@ -135,3 +137,12 @@ export const TOOLS = [
   'Caulking Gun', 'Heat Gun', 'Mixer / Drill',
   'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer',
 ];
+
+export const PRODUCTS_BY_BRAND = {
+  'Tremco': ['TREMproof 250GC', 'TREMproof 60', 'TREMproof VO', 'Vulkem 116', 'Vulkem 45SSL'],
+  'Sika': ['Sikalastic 601', 'Sikalastic 614', 'Sikafloor 2530 W', 'Sika Waterbar'],
+  'BASF': ['MasterSeal 581', 'MasterSeal M 200', 'MasterSeal NP 150', 'MasterSeal 550'],
+  'W.R. Grace': ['Bituthene 3000', 'Bituthene 4000', 'Preprufe 160R', 'Preprufe 300R'],
+  'Henry': ['Henry 790-11', 'Henry 500', 'Henry 887', 'Henry 220'],
+  'GCP Applied': ['Bituthene System 4000', 'Preprufe 300R Plus', 'Perm-A-Barrier NPS'],
+};

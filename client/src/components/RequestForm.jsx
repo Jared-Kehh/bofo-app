@@ -1,7 +1,33 @@
 import React, { useState } from 'react';
-import { EMPLOYEES, JOB_SITES, BRANDS } from '../constants';
+import { EMPLOYEES, JOB_SITES, BRANDS, PRODUCTS_BY_BRAND } from '../constants';
 import { createSubmission } from '../api';
 import s from './RequestForm.module.css';
+
+function QuantityStepper({ value, onChange }) {
+  const num = parseInt(value, 10);
+  const decrement = () => {
+    if (num > 1) onChange(String(num - 1));
+  };
+  const increment = () => onChange(String((isNaN(num) ? 0 : num) + 1));
+  const handleChange = (e) => {
+    const v = e.target.value;
+    if (v === '' || /^\d+$/.test(v)) onChange(v);
+  };
+  return (
+    <div className={s.stepper}>
+      <button type="button" onClick={decrement} className={s.stepBtn}>−</button>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={value}
+        onChange={handleChange}
+        className={s.stepInput}
+        placeholder="0"
+      />
+      <button type="button" onClick={increment} className={s.stepBtn}>+</button>
+    </div>
+  );
+}
 
 export default function RequestForm({ lang: t, onSubmitted }) {
   const [form, setForm] = useState({
@@ -16,6 +42,10 @@ export default function RequestForm({ lang: t, onSubmitted }) {
 
   const handleTypeChange = (val) => {
     setForm(f => ({ ...f, requestType: val, brand: '', product: '', tool: '', description: '', quantity: '' }));
+  };
+
+  const handleBrandChange = (val) => {
+    setForm(f => ({ ...f, brand: val, product: '' }));
   };
 
   const handleSubmit = async (e) => {
@@ -96,7 +126,7 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             <div>
               <label className={s.label}>{t.brand}</label>
               <div className={s.selectWrap}>
-                <select value={form.brand} onChange={e => set('brand', e.target.value)}>
+                <select value={form.brand} onChange={e => handleBrandChange(e.target.value)}>
                   <option value="">{t.selectBrand}</option>
                   {BRANDS.map(b => <option key={b}>{b}</option>)}
                 </select>
@@ -104,11 +134,16 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
             <div>
               <label className={s.label}>{t.product}</label>
-              <input type="text" value={form.product} onChange={e => set('product', e.target.value)} placeholder={t.productPlaceholder} />
+              <div className={s.selectWrap}>
+                <select value={form.product} onChange={e => set('product', e.target.value)} disabled={!form.brand}>
+                  <option value="">{form.brand ? t.selectProduct : t.selectBrand}</option>
+                  {form.brand && (PRODUCTS_BY_BRAND[form.brand] || []).map(p => <option key={p}>{p}</option>)}
+                </select>
+              </div>
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
-              <input type="number" min="1" value={form.quantity} onChange={e => set('quantity', e.target.value)} placeholder="0" />
+              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
             </div>
           </div>
         )}
@@ -126,7 +161,7 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
-              <input type="number" min="1" value={form.quantity} onChange={e => set('quantity', e.target.value)} placeholder="0" />
+              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
             </div>
           </div>
         )}
@@ -139,7 +174,7 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
-              <input type="number" min="1" value={form.quantity} onChange={e => set('quantity', e.target.value)} placeholder="0" />
+              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
             </div>
           </div>
         )}
