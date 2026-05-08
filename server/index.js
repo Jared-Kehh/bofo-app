@@ -35,7 +35,7 @@ app.get('/api/submissions', async (req, res) => {
       .order('timestamp', { ascending: false });
 
     if (error) throw error;
-    res.json(data);
+    res.json(data.map(mapRow));
   } catch (err) {
     console.error('GET error:', err.message);
     res.status(500).json({ error: 'Failed to fetch submissions' });
