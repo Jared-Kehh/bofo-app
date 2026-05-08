@@ -16,6 +16,11 @@ export async function createSubmission(data) {
   return res.json();
 }
 
+export async function deleteSubmission(id) {
+  const res = await fetch(`${BASE}/api/submissions/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete');
+}
+
 export async function updateStatus(id, status) {
   const res = await fetch(`${BASE}/api/submissions/${id}`, {
     method: 'PATCH',

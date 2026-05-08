@@ -78,6 +78,23 @@ app.post('/api/submissions', async (req, res) => {
   }
 });
 
+// DELETE a submission
+app.delete('/api/submissions/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { error } = await supabase
+      .from('submissions')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    res.status(204).send();
+  } catch (err) {
+    console.error('DELETE error:', err.message);
+    res.status(500).json({ error: 'Failed to delete submission' });
+  }
+});
+
 // PATCH update submission status
 app.patch('/api/submissions/:id', async (req, res) => {
   const { id } = req.params;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { JOB_SITES } from '../constants';
-import { getSubmissions, updateStatus as apiUpdateStatus } from '../api';
+import { getSubmissions, updateStatus as apiUpdateStatus, deleteSubmission as apiDeleteSubmission } from '../api';
 import s from './AdminDashboard.module.css';
 
 const STATUS_LABELS = { Pending: 'pending', Approved: 'approved', Completed: 'completed' };
@@ -25,6 +25,7 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
   const [filterStatus, setFilterStatus] = useState('');
   const [filterSite, setFilterSite] = useState('');
   const [updating, setUpdating] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -32,6 +33,19 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
       .then(data => { setSubmissions(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [refreshKey]);
+
+  const deleteSubmission = async (id) => {
+    if (!window.confirm('Delete this submission? This cannot be undone.')) return;
+    setDeleting(id);
+    try {
+      await apiDeleteSubmission(id);
+      setSubmissions(prev => prev.filter(x => x.id !== id));
+    } catch (err) {
+      alert('Failed to delete submission. Please try again.');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const updateStatus = async (id, status) => {
     setUpdating(id);
@@ -165,23 +179,28 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
                   <button
                     className={s.actionBtn}
                     onClick={() => updateStatus(sub.id, 'Pending')}
-                    disabled={updating === sub.id}
+                    disabled={updating === sub.id || deleting === sub.id}
                   >{t.markPending}</button>
                 )}
                 {sub.status !== 'Approved' && (
                   <button
                     className={`${s.actionBtn} ${s.actionApprove}`}
                     onClick={() => updateStatus(sub.id, 'Approved')}
-                    disabled={updating === sub.id}
+                    disabled={updating === sub.id || deleting === sub.id}
                   >{t.markApproved}</button>
                 )}
                 {sub.status !== 'Completed' && (
                   <button
                     className={`${s.actionBtn} ${s.actionComplete}`}
                     onClick={() => updateStatus(sub.id, 'Completed')}
-                    disabled={updating === sub.id}
+                    disabled={updating === sub.id || deleting === sub.id}
                   >{t.markCompleted}</button>
                 )}
+                <button
+                  className={`${s.actionBtn} ${s.actionDelete}`}
+                  onClick={() => deleteSubmission(sub.id)}
+                  disabled={deleting === sub.id || updating === sub.id}
+                >{deleting === sub.id ? 'Deleting…' : 'Delete'}</button>
               </div>
             </div>
           ))}

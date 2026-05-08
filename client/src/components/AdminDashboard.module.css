@@ -223,6 +223,9 @@
 
 .actionComplete { color: var(--gray-500); }
 
+.actionDelete { color: #fff; border-color: #dc2626; background: #dc2626; margin-left: auto; }
+.actionDelete:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; }
+
 .urgentBadge {
   font-size: 11px;
   font-weight: 600;
