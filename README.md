@@ -1,72 +1,81 @@
 # Bofo Waterproofing – Internal Request App
 
-A mobile-friendly web app for submitting material/tool requests by job site.
-
----
-
 ## Project Structure
-
 ```
 bofo-app/
-├── client/        ← React frontend
-└── server/        ← Node.js + Express backend
+├── client/   ← React + Vite frontend
+└── server/   ← Node.js + Express + Supabase backend
 ```
 
 ---
 
-## Setup & Running Locally
+## Supabase Setup
 
-### 1. Start the Backend
+### 1. Create a Supabase project
+Go to https://supabase.com → New Project
 
+### 2. Create the submissions table
+Go to your project → SQL Editor → paste and run this:
+
+```sql
+create table submissions (
+  id uuid default gen_random_uuid() primary key,
+  employee_name text not null,
+  job_site text not null,
+  request_type text not null,
+  details jsonb default '{}'::jsonb,
+  quantity text,
+  needed_by text,
+  priority text default 'normal',
+  notes text default '',
+  status text default 'Pending',
+  timestamp timestamptz default now()
+);
+```
+
+### 3. Get your credentials
+Go to Project Settings → API:
+- Copy **Project URL** → this is your `SUPABASE_URL`
+- Copy **service_role secret key** → this is your `SUPABASE_SERVICE_KEY`
+
+---
+
+## Running Locally
+
+### Backend
 ```bash
 cd server
 npm install
+# Create a .env file with:
+# SUPABASE_URL=https://your-project.supabase.co
+# SUPABASE_SERVICE_KEY=your-service-role-key
+# CLIENT_URL=http://localhost:5173
 npm start
 ```
 
-The API will run on **http://localhost:4000**
-
----
-
-### 2. Start the Frontend
-
-Open a second terminal:
-
+### Frontend
 ```bash
 cd client
 npm install
 npm start
 ```
 
-The app will open at **http://localhost:3000**
-
 ---
 
-## API Endpoints
+## Render Deployment
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/submissions` | Get all submissions |
-| POST | `/api/submissions` | Create new submission |
-| PATCH | `/api/submissions/:id` | Update submission status |
+### Backend (Web Service)
+- Root Directory: `server`
+- Build Command: `npm install`
+- Start Command: `node index.js`
+- Environment Variables:
+  - `SUPABASE_URL` = your Supabase project URL
+  - `SUPABASE_SERVICE_KEY` = your Supabase service role key
+  - `CLIENT_URL` = your frontend Render URL
 
-Submissions are stored in `server/submissions.json`.
-
----
-
-## Features (Test Build)
-
-- Employee name & job site dropdowns
-- Request type selector: Material / Tool / Other
-- Conditional fields per request type
-- Quantity & notes fields
-- English / Spanish language toggle
-- Success confirmation screen
-- Submissions log with status controls (Pending / Approved / Completed)
-
-## Not Included (Full Build)
-
-- Photo upload
-- Full admin dashboard
-- User authentication
-- Database (currently file-based JSON)
+### Frontend (Static Site)
+- Root Directory: `client`
+- Build Command: `npm install && node node_modules/vite/bin/vite.js build`
+- Publish Directory: `dist`
+- Environment Variables:
+  - `VITE_API_URL` = your backend Render URL
