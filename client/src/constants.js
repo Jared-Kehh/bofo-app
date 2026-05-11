@@ -57,7 +57,7 @@ export const LANG = {
     priority: 'Priority',
     priorityUrgent: 'Urgent',
     priorityNormal: 'Normal',
-    tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer'],
+    tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer', 'Rope', 'Hose'],
   },
   es: {
     appSub: 'Bofo Waterproofing Systems',
@@ -111,7 +111,7 @@ export const LANG = {
     pendingCount: 'Pendientes',
     approvedCount: 'Aprobados',
     completedCount: 'Completados',
-    tools: ['Pistola de sellado', 'Pistola de calor', 'Mezclador / Taladro', 'Llana dentada', 'Rodillo', 'Rociador', 'Amoladora', 'Hidrolavadora'],
+    tools: ['Pistola de sellado', 'Pistola de calor', 'Mezclador / Taladro', 'Llana dentada', 'Rodrillo', 'Rociador', 'Amoladora', 'Hidrolavadora', 'Cuerda', 'Mangera'],
     selectProduct: 'Selecciona producto...',
     neededBy: 'Necesito para',
     neededByPlaceholder: 'ej. Lo antes posible, viernes, fin de semana...',
@@ -136,6 +136,7 @@ export const BRANDS = ['Tremco', 'Sika', 'BASF', 'W.R. Grace', 'Henry', 'GCP App
 export const TOOLS = [
   'Caulking Gun', 'Heat Gun', 'Mixer / Drill',
   'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer',
+  'Rope', 'Hose',
 ];
 
 export const PRODUCTS_BY_BRAND = {
