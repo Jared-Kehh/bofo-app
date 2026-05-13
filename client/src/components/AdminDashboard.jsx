@@ -13,9 +13,14 @@ function formatTime(iso) {
 
 function getDetail(sub) {
   const d = sub.details || {};
-  if (sub.requestType === 'material') return [d.brand, d.product].filter(Boolean).join(' – ') || '—';
+  if (sub.requestType === 'material') return [d.brand, d.workType, d.product].filter(Boolean).join(' – ') || '—';
   if (sub.requestType === 'tool') return d.tool || '—';
   return d.description || '—';
+}
+
+function formatQty(sub) {
+  const unit = sub.details?.unit;
+  return unit ? `${sub.quantity} ${unit}` : sub.quantity;
 }
 
 export default function AdminDashboard({ lang: t, refreshKey }) {
@@ -147,7 +152,7 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
                 {sub.quantity && (
                   <div className={s.metaRow}>
                     <span className={s.metaLabel}>{t.qty}</span>
-                    <span className={s.metaVal}>{sub.quantity}</span>
+                    <span className={s.metaVal}>{formatQty(sub)}</span>
                   </div>
                 )}
                 {sub.priority && sub.priority === 'urgent' && (

@@ -7,9 +7,15 @@ export default function SuccessScreen({ lang: t, submission, onReset }) {
 
   const detail = (() => {
     const d = submission.details || {};
-    if (submission.requestType === 'material') return [d.brand, d.product].filter(Boolean).join(' – ');
+    if (submission.requestType === 'material') return [d.brand, d.workType, d.product].filter(Boolean).join(' – ');
     if (submission.requestType === 'tool') return d.tool;
     return d.description;
+  })();
+
+  const qtyDisplay = (() => {
+    if (!submission.quantity) return null;
+    const unit = submission.details?.unit;
+    return unit ? `${submission.quantity} ${unit}` : submission.quantity;
   })();
 
   return (
@@ -29,7 +35,7 @@ export default function SuccessScreen({ lang: t, submission, onReset }) {
           [t.jobSite, submission.jobSite],
           [t.requestType, typeLabel],
           detail && [t.details, detail],
-          submission.quantity && [t.qty, submission.quantity],
+          qtyDisplay && [t.qty, qtyDisplay],
           submission.notes && [t.notes, submission.notes],
           ['Status', t.statusPending],
         ].filter(Boolean).map(([label, val]) => (

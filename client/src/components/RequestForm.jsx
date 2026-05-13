@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EMPLOYEES, JOB_SITES, BRANDS, PRODUCTS_BY_BRAND } from '../constants';
+import { EMPLOYEES, JOB_SITES, BRANDS, WORK_TYPES, PRODUCTS_BY_BRAND_AND_TYPE, UNITS } from '../constants';
 import { createSubmission } from '../api';
 import s from './RequestForm.module.css';
 
@@ -32,7 +32,8 @@ function QuantityStepper({ value, onChange }) {
 export default function RequestForm({ lang: t, onSubmitted }) {
   const [form, setForm] = useState({
     employeeName: '', jobSite: '', requestType: '',
-    brand: '', product: '', tool: '', description: '', quantity: '',
+    brand: '', workType: '', product: '', tool: '', description: '',
+    quantity: '', unit: 'Units',
     neededBy: '', priority: 'normal', notes: ''
   });
   const [loading, setLoading] = useState(false);
@@ -41,11 +42,15 @@ export default function RequestForm({ lang: t, onSubmitted }) {
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleTypeChange = (val) => {
-    setForm(f => ({ ...f, requestType: val, brand: '', product: '', tool: '', description: '', quantity: '' }));
+    setForm(f => ({ ...f, requestType: val, brand: '', workType: '', product: '', tool: '', description: '', quantity: '', unit: 'Units' }));
   };
 
   const handleBrandChange = (val) => {
-    setForm(f => ({ ...f, brand: val, product: '' }));
+    setForm(f => ({ ...f, brand: val, workType: '', product: '' }));
+  };
+
+  const handleWorkTypeChange = (val) => {
+    setForm(f => ({ ...f, workType: val, product: '' }));
   };
 
   const handleSubmit = async (e) => {
@@ -56,9 +61,9 @@ export default function RequestForm({ lang: t, onSubmitted }) {
     setLoading(true);
 
     let details = {};
-    if (form.requestType === 'material') details = { brand: form.brand, product: form.product };
-    else if (form.requestType === 'tool') details = { tool: form.tool };
-    else details = { description: form.description };
+    if (form.requestType === 'material') details = { brand: form.brand, workType: form.workType, product: form.product, unit: form.unit };
+    else if (form.requestType === 'tool') details = { tool: form.tool, unit: form.unit };
+    else details = { description: form.description, unit: form.unit };
 
     try {
       const submission = await createSubmission({
@@ -121,32 +126,56 @@ export default function RequestForm({ lang: t, onSubmitted }) {
           ))}
         </div>
 
-        {form.requestType === 'material' && (
-          <div className={s.conditional}>
-            <div>
-              <label className={s.label}>{t.brand}</label>
-              <div className={s.selectWrap}>
-                <select value={form.brand} onChange={e => handleBrandChange(e.target.value)}>
-                  <option value="">{t.selectBrand}</option>
-                  {BRANDS.map(b => <option key={b}>{b}</option>)}
-                </select>
+        {form.requestType === 'material' && (() => {
+          const availableWorkTypes = form.brand
+            ? WORK_TYPES.filter(wt => (PRODUCTS_BY_BRAND_AND_TYPE[form.brand]?.[wt] || []).length > 0)
+            : [];
+          const availableProducts = form.brand && form.workType
+            ? (PRODUCTS_BY_BRAND_AND_TYPE[form.brand]?.[form.workType] || [])
+            : [];
+          return (
+            <div className={s.conditional}>
+              <div>
+                <label className={s.label}>{t.brand}</label>
+                <div className={s.selectWrap}>
+                  <select value={form.brand} onChange={e => handleBrandChange(e.target.value)}>
+                    <option value="">{t.selectBrand}</option>
+                    {BRANDS.map(b => <option key={b}>{b}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className={s.label}>{t.workType}</label>
+                <div className={s.selectWrap}>
+                  <select value={form.workType} onChange={e => handleWorkTypeChange(e.target.value)} disabled={!form.brand}>
+                    <option value="">{form.brand ? t.selectWorkType : t.selectBrand}</option>
+                    {availableWorkTypes.map(wt => <option key={wt}>{wt}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className={s.label}>{t.product}</label>
+                <div className={s.selectWrap}>
+                  <select value={form.product} onChange={e => set('product', e.target.value)} disabled={!form.workType}>
+                    <option value="">{form.workType ? t.selectProduct : t.selectWorkType}</option>
+                    {availableProducts.map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className={s.label}>{t.quantity}</label>
+                <div className={s.qtyRow}>
+                  <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+                  <div className={`${s.selectWrap} ${s.unitSelect}`}>
+                    <select value={form.unit} onChange={e => set('unit', e.target.value)}>
+                      {UNITS.map(u => <option key={u}>{u}</option>)}
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <label className={s.label}>{t.product}</label>
-              <div className={s.selectWrap}>
-                <select value={form.product} onChange={e => set('product', e.target.value)} disabled={!form.brand}>
-                  <option value="">{form.brand ? t.selectProduct : t.selectBrand}</option>
-                  {form.brand && (PRODUCTS_BY_BRAND[form.brand] || []).map(p => <option key={p}>{p}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className={s.label}>{t.quantity}</label>
-              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {form.requestType === 'tool' && (
           <div className={s.conditional}>
@@ -161,7 +190,14 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
-              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+              <div className={s.qtyRow}>
+                <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+                <div className={`${s.selectWrap} ${s.unitSelect}`}>
+                  <select value={form.unit} onChange={e => set('unit', e.target.value)}>
+                    {UNITS.map(u => <option key={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -174,7 +210,14 @@ export default function RequestForm({ lang: t, onSubmitted }) {
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
-              <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+              <div className={s.qtyRow}>
+                <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+                <div className={`${s.selectWrap} ${s.unitSelect}`}>
+                  <select value={form.unit} onChange={e => set('unit', e.target.value)}>
+                    {UNITS.map(u => <option key={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -12,6 +12,8 @@ export const LANG = {
     jobSite: 'Job site',
     requestType: 'Request type',
     brand: 'Brand',
+    workType: 'Type of Work',
+    selectWorkType: 'Select type...',
     product: 'Product',
     tool: 'Tool',
     describeItem: 'Describe item',
@@ -60,6 +62,8 @@ export const LANG = {
     tools: ['Caulking Gun', 'Heat Gun', 'Mixer / Drill', 'Notched Trowel', 'Roller', 'Sprayer', 'Grinder', 'Power Washer', 'Rope', 'Hose'],
   },
   es: {
+    workType: 'Tipo de trabajo',
+    selectWorkType: 'Selecciona tipo...',
     appSub: 'Bofo Waterproofing Systems',
     formTitle: 'Formulario de solicitud',
     formSub: 'Envía una solicitud de material, herramienta u otro',
@@ -131,7 +135,20 @@ export const JOB_SITES = [
   'Site C – Bridgeview', 'Site D – Evergreen Park', 'Site E – Burbank',
 ];
 
-export const BRANDS = ['Tremco', 'Sika', 'BASF', 'W.R. Grace', 'Henry', 'GCP Applied'];
+export const BRANDS = ['Tremco', 'Sika', 'W.R. Meadows', 'Henry', 'GCP', 'Xypex', '3M'];
+
+export const WORK_TYPES = [
+  'Dampproofing',
+  'Waterproofing',
+  'Traffic Coatings',
+  'Air Barrier',
+  'Firestopping',
+  'Joint Sealants',
+  'Flashing',
+  'Primer',
+];
+
+export const UNITS = ['Units', 'Pails', 'Boxes', 'Pallets'];
 
 export const TOOLS = [
   'Caulking Gun', 'Heat Gun', 'Mixer / Drill',
@@ -139,11 +156,41 @@ export const TOOLS = [
   'Rope', 'Hose',
 ];
 
-export const PRODUCTS_BY_BRAND = {
-  'Tremco': ['TREMproof 250GC', 'TREMproof 60', 'TREMproof VO', 'Vulkem 116', 'Vulkem 45SSL'],
-  'Sika': ['Sikalastic 601', 'Sikalastic 614', 'Sikafloor 2530 W', 'Sika Waterbar'],
-  'BASF': ['MasterSeal 581', 'MasterSeal M 200', 'MasterSeal NP 150', 'MasterSeal 550'],
-  'W.R. Grace': ['Bituthene 3000', 'Bituthene 4000', 'Preprufe 160R', 'Preprufe 300R'],
-  'Henry': ['Henry 790-11', 'Henry 500', 'Henry 887', 'Henry 220'],
-  'GCP Applied': ['Bituthene System 4000', 'Preprufe 300R Plus', 'Perm-A-Barrier NPS'],
+export const PRODUCTS_BY_BRAND_AND_TYPE = {
+  'Tremco': {
+    'Waterproofing':    ['TREMproof 250GC', 'TREMproof 260', 'TREMproof PUMA', 'Paraseal GM', 'Paraseal LG'],
+    'Traffic Coatings': ['Vulkem 350', 'Vulkem 351', 'Vulkem 950 NF', 'Vulkem 951 NF'],
+    'Air Barrier':      ['ExoAir 230', 'ExoAir 230 Low - Temp', 'ExoAir 130', 'ExoAir 130 Low - Temp'],
+    'Joint Sealants':   ['Dymonic 100', 'Spectrum 1', 'Spectrum 2', 'Spectrum 3'],
+    'Flashing':         ['ExoAir 110AT 6"', 'ExoAir 110AT 9"', 'ExoAir 110AT 12"'],
+  },
+  'Sika': {
+    'Dampproofing':     ['Sikalastic - 310', 'Sikalastic - 314', 'Sikalastic - 315'],
+    'Traffic Coatings': ['Sikalastic Vehicular Traffic 2000', 'Sikalastic Vehicular Traffic 2500', 'Sikalastic Vehicular Traffic 2575', 'Sikalastic Vehicular Traffic 2850', 'Sikalastic Vehicular Traffic 2900'],
+    'Joint Sealants':   ['Sikaflex - 2c SL', 'Sikaflex - 2c NS EZ Mix', 'Sikaflex -1A', 'Sikaflex -1c SL'],
+  },
+  'W.R. Meadows': {
+    'Dampproofing':  ['SealMastic Type I', 'SealMastic Type II', 'SealMastic Type III'],
+    'Waterproofing': ['Mel - Rol', 'Precon', 'Precon Low - Temp', 'MEL - DRAIN'],
+    'Air Barrier':   ['Air-Shield LSR', 'Air-Shield LMP', 'Air-Shield LSR Low - Temp', 'Air-Shield LMP Low - Temp', 'Air-Shield', 'Air-Shield Low - Temp'],
+    'Joint Sealants': ['BEM'],
+    'Flashing':      ['AirShield 6"', 'AirShield 9"', 'AirShield 12"', 'AirShield Butyl Flashing 4"', 'AirShield Butyl Flashing 6"', 'AirShield Butyl Flashing 9"', 'AirShield Butyl Flashing 12"'],
+    'Primer':        ['Mel-Prime'],
+  },
+  'Henry': {
+    'Waterproofing': ['Blueskin VP100', 'Pumadeq'],
+    'Air Barrier':   ['Air-Bloc 16MR', 'Air-Bloc 17MR', 'Barritech NP Fire - Resistant', 'Barritech NP Fire - Resistant Low - Temp', 'Barritech VP', 'Blueskin SA', 'Blueskin VP160', 'CCW - 705', 'CCW - 705 Low - Temp', 'CCW - 702'],
+    'Flashing':      ['Blueskin SA Flashing 4"', 'Blueskin SA Flashing 6"', 'Blueskin SA Flashing 9"', 'Blueskin SA Flashing 12"'],
+    'Primer':        ['Blueskin'],
+  },
+  'GCP': {
+    'Waterproofing': ['Bituthene 3000', 'Bituthene 4000'],
+    'Air Barrier':   ['Perm-A-Barrier'],
+  },
+  'Xypex': {
+    'Waterproofing': ['Xypex'],
+  },
+  '3M': {
+    'Firestopping': ['3M Fire Barrier Water Tight Spray', '3M FireDam Spray 200'],
+  },
 };
