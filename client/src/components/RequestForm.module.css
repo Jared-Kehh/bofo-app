@@ -89,6 +89,37 @@
   background: var(--gray-50);
 }
 
+.timingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.timingBtn {
+  padding: 14px 8px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: center;
+}
+
+.timingBtn:hover { border-color: var(--gray-400); color: var(--gray-900); }
+
+.timingBtnSel {
+  border-color: var(--gray-900);
+  color: var(--gray-900);
+  font-weight: 500;
+  background: var(--gray-50);
+}
+
+.spanTwo { grid-column: span 2; }
+
 .conditional {
   margin-top: 14px;
   padding-top: 14px;

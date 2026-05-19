@@ -224,27 +224,14 @@ export default function RequestForm({ lang: t, onSubmitted }) {
       </div>
 
       <div className={s.section}>
-        <label className={s.label}>{t.neededBy}</label>
-        <input
-          type="text"
-          value={form.neededBy}
-          onChange={e => set('neededBy', e.target.value)}
-          placeholder={t.neededByPlaceholder}
-        />
-      </div>
-
-      <div className={s.section}>
-        <label className={s.label}>{t.priority}</label>
-        <div className={s.typeGrid}>
-          {[
-            { val: 'normal', label: t.priorityNormal },
-            { val: 'urgent', label: t.priorityUrgent },
-          ].map(opt => (
+        <label className={s.label}>{t.whenNeeded}</label>
+        <div className={s.timingGrid}>
+          {t.timingOptions.map((opt, i) => (
             <button
-              key={opt.val}
+              key={opt.label}
               type="button"
-              className={`${s.typeBtn} ${form.priority === opt.val ? s.typeBtnSel : ''}`}
-              onClick={() => set('priority', opt.val)}
+              className={`${s.timingBtn} ${form.neededBy === opt.label ? s.timingBtnSel : ''} ${i === t.timingOptions.length - 1 ? s.spanTwo : ''}`}
+              onClick={() => setForm(f => ({ ...f, neededBy: opt.label, priority: opt.priority }))}
             >
               {opt.label}
             </button>

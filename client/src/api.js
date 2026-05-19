@@ -30,3 +30,35 @@ export async function updateStatus(id, status) {
   if (!res.ok) throw new Error('Failed to update');
   return res.json();
 }
+
+export async function uploadReportPhoto(file) {
+  const formData = new FormData();
+  formData.append('photo', file);
+  const res = await fetch(`${BASE}/api/reports/photos`, {
+    method: 'POST',
+    body: formData
+  });
+  if (!res.ok) throw new Error('Failed to upload photo');
+  return res.json();
+}
+
+export async function createReport(data) {
+  const res = await fetch(`${BASE}/api/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('Failed to submit report');
+  return res.json();
+}
+
+export async function getReports() {
+  const res = await fetch(`${BASE}/api/reports`);
+  if (!res.ok) throw new Error('Failed to fetch reports');
+  return res.json();
+}
+
+export async function deleteReport(id) {
+  const res = await fetch(`${BASE}/api/reports/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete report');
+}
