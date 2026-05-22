@@ -5,16 +5,18 @@ import SuccessScreen from './components/SuccessScreen';
 import AdminDashboard from './components/AdminDashboard';
 import DailyReportForm from './components/DailyReportForm';
 import DailyReportAdmin from './components/DailyReportAdmin';
+import PinScreen from './components/PinScreen';
 import './App.css';
 
 export default function App() {
   const [lang, setLang] = useState('en');
-  const [view, setView] = useState('form'); // 'form'|'success'|'report'|'reportSuccess'|'admin'
+  const [view, setView] = useState('form'); // 'form'|'success'|'report'|'reportSuccess'|'pin'|'admin'
   const [lastSubmission, setLastSubmission] = useState(null);
   const [lastReport, setLastReport] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [reportRefreshKey, setReportRefreshKey] = useState(0);
   const [adminTab, setAdminTab] = useState('requests'); // 'requests'|'reports'
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
 
   const t = LANG[lang];
 
@@ -36,20 +38,37 @@ export default function App() {
     if (v !== 'reportSuccess') setLastReport(null);
   };
 
+  const goToAdmin = () => {
+    if (adminUnlocked) {
+      setView('admin');
+    } else {
+      setView('pin');
+    }
+  };
+
+  const handlePinUnlock = () => {
+    setAdminUnlocked(true);
+    setView('admin');
+  };
+
+  const isWorkerView = ['form', 'success', 'report', 'reportSuccess'].includes(view);
+  const isPinView = view === 'pin';
+  const isAdminView = view === 'admin';
+
+  const isFormActive = view === 'form' || view === 'success';
+  const isReportActive = view === 'report' || view === 'reportSuccess';
+
   const pageTitle =
-    view === 'admin' ? t.adminTitle
+    isAdminView ? t.adminTitle
     : view === 'report' || view === 'reportSuccess' ? t.reportTitle
     : view === 'success' ? t.successTitle
     : t.formTitle;
 
   const pageSub =
-    view === 'admin' ? t.adminSub
+    isAdminView ? t.adminSub
     : view === 'report' ? t.reportSub
     : view === 'success' || view === 'reportSuccess' ? ''
     : t.formSub;
-
-  const isFormActive = view !== 'admin' && view !== 'report' && view !== 'reportSuccess';
-  const isReportActive = view === 'report' || view === 'reportSuccess';
 
   return (
     <div className="app">
@@ -61,21 +80,25 @@ export default function App() {
             <button className={"langBtn" + (lang === 'es' ? ' langActive' : '')} onClick={() => setLang('es')}>ES</button>
           </div>
         </div>
-        <div className="pageHeader">
-          <h1 className="pageTitle">{pageTitle}</h1>
-          {pageSub && <p className="pageSub">{pageSub}</p>}
-        </div>
-        <nav className="nav">
-          <button className={"navBtn" + (isFormActive ? ' navActive' : '')} onClick={() => goTo('form')}>
-            {t.navForm}
-          </button>
-          <button className={"navBtn" + (isReportActive ? ' navActive' : '')} onClick={() => goTo('report')}>
-            {t.navReport}
-          </button>
-          <button className={"navBtn" + (view === 'admin' ? ' navActive' : '')} onClick={() => goTo('admin')}>
-            {t.navAdmin}
-          </button>
-        </nav>
+        {!isPinView && (
+          <div className="pageHeader">
+            <h1 className="pageTitle">{pageTitle}</h1>
+            {pageSub && <p className="pageSub">{pageSub}</p>}
+          </div>
+        )}
+        {!isPinView && (
+          <nav className="nav">
+            <button className={"navBtn" + (isFormActive ? ' navActive' : '')} onClick={() => goTo('form')}>
+              {t.navForm}
+            </button>
+            <button className={"navBtn" + (isReportActive ? ' navActive' : '')} onClick={() => goTo('report')}>
+              {t.navReport}
+            </button>
+            <button className={"navBtn" + (isAdminView ? ' navActive' : '')} onClick={goToAdmin}>
+              {t.navAdmin}
+            </button>
+          </nav>
+        )}
       </header>
 
       <main className="main">
@@ -122,7 +145,10 @@ export default function App() {
             <button className="rsResetBtn" onClick={() => goTo('report')}>{t.newReport}</button>
           </div>
         )}
-        {view === 'admin' && (
+        {isPinView && (
+          <PinScreen lang={t} onUnlock={handlePinUnlock} onBack={() => goTo('form')} />
+        )}
+        {isAdminView && (
           <div className="adminArea">
             <div className="adminTabs">
               <button
@@ -143,6 +169,7 @@ export default function App() {
           </div>
         )}
       </main>
+
     </div>
   );
 }

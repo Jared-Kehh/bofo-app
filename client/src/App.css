@@ -114,12 +114,10 @@
 
 .adminTabs {
   display: flex;
+  align-items: center;
   border-bottom: var(--border);
   padding: 0 24px;
   background: var(--white);
-  position: sticky;
-  top: var(--header-height, 0);
-  z-index: 5;
 }
 
 .adminTabBtn {
@@ -231,6 +229,49 @@
 
 .rsResetBtn:hover {
   opacity: 0.85;
+}
+
+.adminExitBtn {
+  margin-left: auto;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--gray-400);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  transition: color 0.12s;
+}
+
+.adminExitBtn:hover {
+  color: var(--gray-700);
+}
+
+/* Worker footer — discrete admin entry point */
+.workerFooter {
+  display: flex;
+  justify-content: center;
+  padding: 20px 24px 28px;
+  margin-top: auto;
+}
+
+.adminLink {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--gray-300);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  transition: color 0.12s;
+}
+
+.adminLink:hover {
+  color: var(--gray-500);
 }
 
 @media (max-width: 600px) {

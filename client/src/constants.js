@@ -76,6 +76,13 @@ export const LANG = {
     newReport: 'Submit another report',
     adminRequestsTab: 'Requests',
     adminReportsTab: 'Work Reports',
+    adminLinkText: 'Admin',
+    exitAdmin: 'Exit',
+    pinTitle: 'Admin access',
+    pinPlaceholder: 'Enter PIN',
+    pinUnlock: 'Unlock',
+    pinError: 'Incorrect PIN.',
+    pinBack: 'Back',
   },
   es: {
     workType: 'Tipo de trabajo',
@@ -154,6 +161,13 @@ export const LANG = {
     newReport: 'Enviar otro reporte',
     adminRequestsTab: 'Solicitudes',
     adminReportsTab: 'Reportes de Trabajo',
+    adminLinkText: 'Admin',
+    exitAdmin: 'Salir',
+    pinTitle: 'Acceso de administrador',
+    pinPlaceholder: 'Ingresa el PIN',
+    pinUnlock: 'Desbloquear',
+    pinError: 'PIN incorrecto.',
+    pinBack: 'Volver',
   }
 };
 
