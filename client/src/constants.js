@@ -192,8 +192,28 @@ export const EMPLOYEES = [
 ];
 
 export const JOB_SITES = [
-  'Site A – Oak Lawn', 'Site B – Cicero',
-  'Site C – Bridgeview', 'Site D – Evergreen Park', 'Site E – Burbank',
+  'Franciscan Hospital - Munster',
+  'Ravinia Phase 2',
+  '537 W. Drummond',
+  'Oak Park River Forest High School',
+  'Sacred Apartments',
+  'Leyden Community Center',
+  'CDA TP09 - MCP Building',
+  "O'Hare Terminal 3",
+  '2355 W. 63rd St.',
+  'South Side Community Center',
+  'U-Haul Frankfort',
+  'Fernway School',
+  'Regents Park Lobby',
+  'Spaulding School',
+  'Project Lighthouse',
+  'North Shore Water Reclamation',
+  'Legends South',
+  'Rivian Oakbrook',
+  'Evanston Township School',
+  'Demeter 4.0',
+  'Helen Keller School',
+  'Colectivo Cafe',
 ];
 
 export const BRANDS = ['Tremco', 'Sika', 'W.R. Meadows', 'Henry', 'GCP', 'Xypex', '3M'];
