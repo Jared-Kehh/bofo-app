@@ -214,6 +214,13 @@ export const JOB_SITES = [
   'Demeter 4.0',
   'Helen Keller School',
   'Colectivo Cafe',
+  'Boone County Courthouse',
+  'DePaul College Prep',
+  'Quincy Station',
+  'Kells (George) Park Fieldhouse',
+  'Lovell VA Expand Sterile',
+  'RPS Carlson',
+  'The Anchorage',
 ];
 
 export const BRANDS = ['Tremco', 'Sika', 'W.R. Meadows', 'Henry', 'GCP', 'Xypex', '3M'];
