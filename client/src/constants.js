@@ -221,6 +221,10 @@ export const JOB_SITES = [
   'Lovell VA Expand Sterile',
   'RPS Carlson',
   'The Anchorage',
+  'Rosemont Elementary School',
+  'East Chicago Central High School',
+  'Wintrust Community Bank',
+  'Argo Ingredion Project',
 ];
 
 export const BRANDS = ['Tremco', 'Sika', 'W.R. Meadows', 'Henry', 'GCP', 'Xypex', '3M'];
