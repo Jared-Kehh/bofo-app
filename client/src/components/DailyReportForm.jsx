@@ -5,7 +5,10 @@ import styles from './DailyReportForm.module.css';
 
 const MIN_PHOTOS = 4;
 
-export default function DailyReportForm({ onSubmitted }) {
+export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
+  const allSites = extraSites.length > 0
+    ? [...extraSites].sort((a, b) => a.localeCompare(b))
+    : JOB_SITES;
   const [employee, setEmployee] = useState('');
   const [site, setSite] = useState('');
   const [notes, setNotes] = useState('');
@@ -106,7 +109,7 @@ export default function DailyReportForm({ onSubmitted }) {
           disabled={submitting}
         >
           <option value="">Select site...</option>
-          {JOB_SITES.map(s => (
+          {allSites.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>

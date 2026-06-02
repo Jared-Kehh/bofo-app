@@ -251,6 +251,84 @@ function mapReport(row) {
   };
 }
 
+// POST seed base locations (only inserts names that don't already exist)
+app.post('/api/locations/seed', async (req, res) => {
+  const { names } = req.body;
+  if (!Array.isArray(names) || !names.length) {
+    return res.status(400).json({ error: 'names array required' });
+  }
+  try {
+    const { data: existing, error: fetchErr } = await supabase
+      .from('job_sites')
+      .select('name');
+    if (fetchErr) throw fetchErr;
+
+    const existingNames = new Set(existing.map(r => r.name));
+    const toInsert = names.filter(n => !existingNames.has(n)).map(name => ({ name }));
+
+    if (!toInsert.length) return res.json([]);
+
+    const { data, error } = await supabase
+      .from('job_sites')
+      .insert(toInsert)
+      .select();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    console.error('SEED locations error:', err.message);
+    res.status(500).json({ error: 'Failed to seed locations' });
+  }
+});
+
+// GET all custom locations
+app.get('/api/locations', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('job_sites')
+      .select('*')
+      .order('name', { ascending: true });
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    console.error('GET locations error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch locations' });
+  }
+});
+
+// POST add a custom location
+app.post('/api/locations', async (req, res) => {
+  const { name } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Name required' });
+  try {
+    const { data, error } = await supabase
+      .from('job_sites')
+      .insert([{ name: name.trim() }])
+      .select()
+      .single();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    console.error('POST location error:', err.message);
+    res.status(500).json({ error: 'Failed to add location' });
+  }
+});
+
+// DELETE a custom location
+app.delete('/api/locations/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { error } = await supabase
+      .from('job_sites')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.status(204).send();
+  } catch (err) {
+    console.error('DELETE location error:', err.message);
+    res.status(500).json({ error: 'Failed to delete location' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Bofo server running on http://localhost:${PORT}`);
 });

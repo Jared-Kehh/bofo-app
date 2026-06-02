@@ -62,3 +62,34 @@ export async function deleteReport(id) {
   const res = await fetch(`${BASE}/api/reports/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete report');
 }
+
+export async function getLocations() {
+  const res = await fetch(`${BASE}/api/locations`);
+  if (!res.ok) throw new Error('Failed to fetch locations');
+  return res.json();
+}
+
+export async function addLocation(name) {
+  const res = await fetch(`${BASE}/api/locations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  });
+  if (!res.ok) throw new Error('Failed to add location');
+  return res.json();
+}
+
+export async function deleteLocation(id) {
+  const res = await fetch(`${BASE}/api/locations/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete location');
+}
+
+export async function seedLocations(names) {
+  const res = await fetch(`${BASE}/api/locations/seed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ names })
+  });
+  if (!res.ok) throw new Error('Failed to seed locations');
+  return res.json();
+}

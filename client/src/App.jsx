@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LANG } from './constants';
 import RequestForm from './components/RequestForm';
 import SuccessScreen from './components/SuccessScreen';
 import AdminDashboard from './components/AdminDashboard';
 import DailyReportForm from './components/DailyReportForm';
 import DailyReportAdmin from './components/DailyReportAdmin';
+import ManageLocations from './components/ManageLocations';
 import PinScreen from './components/PinScreen';
+import { getLocations } from './api';
 import './App.css';
 
 export default function App() {
@@ -17,8 +19,13 @@ export default function App() {
   const [reportRefreshKey, setReportRefreshKey] = useState(0);
   const [adminTab, setAdminTab] = useState('requests'); // 'requests'|'reports'
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [customLocations, setCustomLocations] = useState([]);
 
   const t = LANG[lang];
+
+  useEffect(() => {
+    getLocations().then(setCustomLocations).catch(() => {});
+  }, []);
 
   const handleSubmitted = (submission) => {
     setLastSubmission(submission);
@@ -103,13 +110,13 @@ export default function App() {
 
       <main className="main">
         {view === 'form' && (
-          <RequestForm lang={t} onSubmitted={handleSubmitted} />
+          <RequestForm lang={t} onSubmitted={handleSubmitted} extraSites={customLocations.map(c => c.name)} />
         )}
         {view === 'success' && lastSubmission && (
           <SuccessScreen lang={t} submission={lastSubmission} onReset={() => goTo('form')} />
         )}
         {view === 'report' && (
-          <DailyReportForm onSubmitted={handleReportSubmitted} />
+          <DailyReportForm onSubmitted={handleReportSubmitted} extraSites={customLocations.map(c => c.name)} />
         )}
         {view === 'reportSuccess' && (
           <div className="reportSuccess">
@@ -163,9 +170,20 @@ export default function App() {
               >
                 {t.adminReportsTab}
               </button>
+              <button
+                className={"adminTabBtn" + (adminTab === 'locations' ? ' adminTabActive' : '')}
+                onClick={() => setAdminTab('locations')}
+              >
+                {t.adminLocationsTab}
+              </button>
             </div>
-            {adminTab === 'requests' && <AdminDashboard lang={t} refreshKey={refreshKey} />}
+            {adminTab === 'requests' && <AdminDashboard lang={t} refreshKey={refreshKey} sites={customLocations.map(c => c.name)} />}
             {adminTab === 'reports'  && <DailyReportAdmin refreshKey={reportRefreshKey} />}
+            {adminTab === 'locations' && (
+              <ManageLocations
+                onLocationsChange={setCustomLocations}
+              />
+            )}
           </div>
         )}
       </main>

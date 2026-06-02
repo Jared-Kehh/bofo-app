@@ -29,7 +29,10 @@ function QuantityStepper({ value, onChange }) {
   );
 }
 
-export default function RequestForm({ lang: t, onSubmitted }) {
+export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
+  const allSites = extraSites.length > 0
+    ? [...extraSites].sort((a, b) => a.localeCompare(b))
+    : JOB_SITES;
   const [form, setForm] = useState({
     employeeName: '', jobSite: '', requestType: '',
     brand: '', workType: '', product: '', tool: '', description: '',
@@ -102,7 +105,7 @@ export default function RequestForm({ lang: t, onSubmitted }) {
         <div className={s.selectWrap}>
           <select value={form.jobSite} onChange={e => set('jobSite', e.target.value)}>
             <option value="">{t.selectSite}</option>
-            {JOB_SITES.map(site => <option key={site}>{site}</option>)}
+            {allSites.map(site => <option key={site}>{site}</option>)}
           </select>
         </div>
       </div>

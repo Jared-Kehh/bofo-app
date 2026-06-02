@@ -1,0 +1,124 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+.addRow {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  padding: 9px 12px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-900);
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+.input:focus { border-color: var(--gray-900); }
+.input::placeholder { color: var(--gray-400); }
+.input:disabled { opacity: 0.5; }
+
+.addBtn {
+  padding: 9px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Geist', sans-serif;
+  background: var(--gray-900);
+  color: var(--white);
+  cursor: pointer;
+  transition: opacity 0.12s;
+  white-space: nowrap;
+}
+
+.addBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.error {
+  font-size: 12px;
+  color: #dc2626;
+  margin: 0;
+}
+
+.empty {
+  padding: 32px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-400);
+}
+
+.count {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  padding-bottom: 4px;
+  border-bottom: var(--border);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: var(--border);
+}
+
+.row:last-child { border-bottom: none; }
+
+.name {
+  font-size: 13px;
+  color: var(--gray-700);
+  flex: 1;
+}
+
+.baseTag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.deleteBtn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 1;
+  background: var(--white);
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: var(--white);
+}
+
+.deleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }

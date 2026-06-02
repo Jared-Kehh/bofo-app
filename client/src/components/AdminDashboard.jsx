@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { JOB_SITES } from '../constants';
 import { getSubmissions, updateStatus as apiUpdateStatus, deleteSubmission as apiDeleteSubmission } from '../api';
+
 import s from './AdminDashboard.module.css';
 
 const STATUS_LABELS = { Pending: 'pending', Approved: 'approved', Completed: 'completed' };
@@ -23,7 +24,7 @@ function formatQty(sub) {
   return unit ? `${sub.quantity} ${unit}` : sub.quantity;
 }
 
-export default function AdminDashboard({ lang: t, refreshKey }) {
+export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES }) {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -114,7 +115,7 @@ export default function AdminDashboard({ lang: t, refreshKey }) {
           <div className={s.selectWrap}>
             <select value={filterSite} onChange={e => setFilterSite(e.target.value)}>
               <option value="">{t.allSites}</option>
-              {JOB_SITES.map(site => <option key={site}>{site}</option>)}
+              {[...sites].sort((a, b) => a.localeCompare(b)).map(site => <option key={site}>{site}</option>)}
             </select>
           </div>
         </div>
