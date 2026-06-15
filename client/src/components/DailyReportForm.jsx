@@ -3,6 +3,32 @@ import { EMPLOYEES, JOB_SITES } from '../constants';
 import { uploadReportPhoto, createReport } from '../api';
 import styles from './DailyReportForm.module.css';
 
+async function compressImage(file, maxWidth = 1920, quality = 0.82) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = Math.round((height / width) * maxWidth);
+        width = maxWidth;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        blob => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })),
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
 const MIN_PHOTOS = 4;
 
 export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
@@ -63,7 +89,8 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
     try {
       let done = 0;
       const urlPromises = photos.map(async (p) => {
-        const result = await uploadReportPhoto(p.file);
+        const compressed = await compressImage(p.file);
+        const result = await uploadReportPhoto(compressed, site, employee);
         done++;
         setProgress({ done, total: photos.length });
         return result.url;

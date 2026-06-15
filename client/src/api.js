@@ -31,9 +31,11 @@ export async function updateStatus(id, status) {
   return res.json();
 }
 
-export async function uploadReportPhoto(file) {
+export async function uploadReportPhoto(file, jobSite, employeeName) {
   const formData = new FormData();
   formData.append('photo', file);
+  if (jobSite) formData.append('jobSite', jobSite);
+  if (employeeName) formData.append('employeeName', employeeName);
   const res = await fetch(`${BASE}/api/reports/photos`, {
     method: 'POST',
     body: formData

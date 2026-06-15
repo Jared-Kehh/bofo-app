@@ -3,14 +3,38 @@ import { JOB_SITES } from '../constants';
 import { getReports, deleteReport } from '../api';
 import styles from './DailyReportAdmin.module.css';
 
-export default function DailyReportAdmin({ refreshKey }) {
+async function downloadPhoto(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename || 'photo.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  } catch {
+    window.open(url, '_blank');
+  }
+}
+
+function photoFilename(report, index) {
+  const name = (report.employeeName || 'photo').replace(/\s+/g, '_');
+  const date = report.date || new Date(report.timestamp).toISOString().split('T')[0];
+  return `${name}_${date}_photo${index + 1}.jpg`;
+}
+
+export default function DailyReportAdmin({ refreshKey, sites = JOB_SITES }) {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterSite, setFilterSite] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [expanded, setExpanded] = useState(null);
-  const [lightbox, setLightbox] = useState(null);
+  const [lightbox, setLightbox] = useState(null); // { url, filename }
+  const [downloading, setDownloading] = useState(null);
 
   useEffect(() => { load(); }, [refreshKey]);
 
@@ -38,7 +62,19 @@ export default function DailyReportAdmin({ refreshKey }) {
     }
   };
 
+  const handleDownloadAll = async (report, e) => {
+    e.stopPropagation();
+    if (!report.photoUrls?.length) return;
+    setDownloading(report.id);
+    for (let i = 0; i < report.photoUrls.length; i++) {
+      await downloadPhoto(report.photoUrls[i], photoFilename(report, i));
+      if (i < report.photoUrls.length - 1) await new Promise(r => setTimeout(r, 200));
+    }
+    setDownloading(null);
+  };
+
   const uniqueEmployees = [...new Set(reports.map(r => r.employeeName))].sort();
+  const sortedSites = [...sites].sort((a, b) => a.localeCompare(b));
 
   const filtered = reports.filter(r => {
     if (filterSite && r.jobSite !== filterSite) return false;
@@ -72,7 +108,7 @@ export default function DailyReportAdmin({ refreshKey }) {
           onChange={e => setFilterSite(e.target.value)}
         >
           <option value="">All Sites</option>
-          {JOB_SITES.map(s => <option key={s} value={s}>{s}</option>)}
+          {sortedSites.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select
           className={styles.filterSelect}
@@ -109,24 +145,46 @@ export default function DailyReportAdmin({ refreshKey }) {
                 <div className={styles.cardRight}>
                   <span className={styles.photoCount}>{report.photoUrls?.length || 0} photos</span>
                   <span className={styles.date}>{fmtDate(report.timestamp)}</span>
+                  {report.photoUrls?.length > 0 && (
+                    <button
+                      className={styles.dlAllBtn}
+                      onClick={e => handleDownloadAll(report, e)}
+                      disabled={downloading === report.id}
+                      title="Download all photos"
+                    >
+                      {downloading === report.id ? '…' : '↓ All'}
+                    </button>
+                  )}
                   <span className={styles.chevron}>{expanded === report.id ? '▲' : '▼'}</span>
                 </div>
               </div>
 
               {expanded === report.id && (
                 <div className={styles.cardBody}>
-                  {report.notes ? (
+                  {report.notes && (
                     <div className={styles.notes}>
                       <span className={styles.notesLabel}>Notes</span>
                       <p className={styles.notesText}>{report.notes}</p>
                     </div>
-                  ) : null}
+                  )}
 
                   {report.photoUrls?.length > 0 ? (
                     <div className={styles.photoGrid}>
                       {report.photoUrls.map((url, i) => (
-                        <div key={i} className={styles.photoWrap} onClick={() => setLightbox(url)}>
-                          <img src={url} alt={`Photo ${i + 1}`} className={styles.photo} />
+                        <div key={i} className={styles.photoWrap}>
+                          <img
+                            src={url}
+                            alt={`Photo ${i + 1}`}
+                            className={styles.photo}
+                            onClick={() => setLightbox({ url, filename: photoFilename(report, i) })}
+                          />
+                          <button
+                            className={styles.photoDownloadBtn}
+                            onClick={() => downloadPhoto(url, photoFilename(report, i))}
+                            title="Download"
+                          >
+                            ↓
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -136,7 +194,7 @@ export default function DailyReportAdmin({ refreshKey }) {
 
                   <button
                     className={styles.deleteBtn}
-                    onClick={(e) => handleDelete(report.id, e)}
+                    onClick={e => handleDelete(report.id, e)}
                   >
                     Delete Report
                   </button>
@@ -150,8 +208,15 @@ export default function DailyReportAdmin({ refreshKey }) {
       {lightbox && (
         <div className={styles.lightbox} onClick={() => setLightbox(null)}>
           <div className={styles.lightboxInner} onClick={e => e.stopPropagation()}>
-            <img src={lightbox} alt="Full size" className={styles.lightboxImg} />
+            <img src={lightbox.url} alt="Full size" className={styles.lightboxImg} />
             <button className={styles.lightboxClose} onClick={() => setLightbox(null)}>×</button>
+            <button
+              className={styles.lightboxDownload}
+              onClick={() => downloadPhoto(lightbox.url, lightbox.filename)}
+              title="Download photo"
+            >
+              ↓
+            </button>
           </div>
         </div>
       )}

@@ -130,17 +130,28 @@ app.patch('/api/submissions/:id', async (req, res) => {
   }
 });
 
+function sanitizePath(str) {
+  return (str || 'unknown')
+    .replace(/[^a-zA-Z0-9-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '')
+    .toLowerCase();
+}
+
 // POST upload a single report photo to Supabase Storage
 app.post('/api/reports/photos', upload.single('photo'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file provided' });
 
+  const jobSite = req.body.jobSite || 'unknown';
+  const employeeName = req.body.employeeName || 'unknown';
+  const date = new Date().toISOString().split('T')[0];
   const ext = path.extname(req.file.originalname) || '.jpg';
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+  const storagePath = `${sanitizePath(jobSite)}/${date}/${sanitizePath(employeeName)}/${Date.now()}${ext}`;
 
   try {
     const { error } = await supabase.storage
-      .from('report-photos')
-      .upload(filename, req.file.buffer, {
+      .from('work-report-photos')
+      .upload(storagePath, req.file.buffer, {
         contentType: req.file.mimetype,
         upsert: false
       });
@@ -148,8 +159,8 @@ app.post('/api/reports/photos', upload.single('photo'), async (req, res) => {
     if (error) throw error;
 
     const { data: urlData } = supabase.storage
-      .from('report-photos')
-      .getPublicUrl(filename);
+      .from('work-report-photos')
+      .getPublicUrl(storagePath);
 
     res.json({ url: urlData.publicUrl });
   } catch (err) {

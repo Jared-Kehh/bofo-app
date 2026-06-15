@@ -184,6 +184,7 @@
 }
 
 .photoWrap {
+  position: relative;
   aspect-ratio: 1;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -252,6 +253,53 @@
   display: block;
 }
 
+/* Download all button in card header */
+.dlAllBtn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Geist', sans-serif;
+  background: var(--gray-100);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--gray-600);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.dlAllBtn:hover:not(:disabled) {
+  background: var(--gray-900);
+  border-color: var(--gray-900);
+  color: var(--white);
+}
+
+.dlAllBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Per-photo download button (overlay) */
+.photoDownloadBtn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--white);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  padding: 0;
+}
+
+.photoWrap:hover .photoDownloadBtn { opacity: 1; }
+
 .lightboxClose {
   position: absolute;
   top: -14px;
@@ -270,3 +318,24 @@
   color: var(--gray-900);
   padding: 0 0 1px;
 }
+
+.lightboxDownload {
+  position: absolute;
+  bottom: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  background: var(--white);
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-900);
+  padding: 0;
+  transition: background 0.12s;
+}
+
+.lightboxDownload:hover { background: var(--gray-100); }
