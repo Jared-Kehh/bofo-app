@@ -84,6 +84,11 @@ export const LANG = {
     pinUnlock: 'Unlock',
     pinError: 'Incorrect PIN.',
     pinBack: 'Back',
+    downloadZip: 'Download ZIP',
+    exportPdf: 'Export PDF',
+    downloadAll: 'Download All',
+    buildingZip: 'Building ZIP…',
+    generatingPdf: 'Generating PDF…',
   },
   es: {
     workType: 'Tipo de trabajo',
@@ -170,6 +175,11 @@ export const LANG = {
     pinUnlock: 'Desbloquear',
     pinError: 'PIN incorrecto.',
     pinBack: 'Volver',
+    downloadZip: 'Descargar ZIP',
+    exportPdf: 'Exportar PDF',
+    downloadAll: 'Descargar todo',
+    buildingZip: 'Creando ZIP…',
+    generatingPdf: 'Generando PDF…',
   }
 };
 

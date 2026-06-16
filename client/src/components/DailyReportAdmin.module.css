@@ -277,6 +277,55 @@
 
 .dlAllBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 
+/* Feature 3 — Download All filtered button (below filters) */
+.downloadAllBtn {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Geist', sans-serif;
+  background: var(--gray-900);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.12s;
+}
+
+.downloadAllBtn:hover:not(:disabled) { opacity: 0.82; }
+.downloadAllBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Feature 4 — action row above photo grid */
+.actionRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* PDF export button */
+.pdfBtn {
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Geist', sans-serif;
+  background: none;
+  color: var(--gray-700);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.pdfBtn:hover:not(:disabled) {
+  background: var(--gray-900);
+  border-color: var(--gray-900);
+  color: var(--white);
+}
+
+.pdfBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* Per-photo download button (overlay) */
 .photoDownloadBtn {
   position: absolute;

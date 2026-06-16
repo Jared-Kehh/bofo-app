@@ -178,7 +178,7 @@ export default function App() {
               </button>
             </div>
             {adminTab === 'requests' && <AdminDashboard lang={t} refreshKey={refreshKey} sites={customLocations.map(c => c.name)} />}
-            {adminTab === 'reports'  && <DailyReportAdmin refreshKey={reportRefreshKey} sites={customLocations.map(c => c.name)} />}
+            {adminTab === 'reports'  && <DailyReportAdmin lang={t} refreshKey={reportRefreshKey} sites={customLocations.map(c => c.name)} />}
             {adminTab === 'locations' && (
               <ManageLocations
                 onLocationsChange={setCustomLocations}
