@@ -31,10 +31,10 @@ async function compressImage(file, maxWidth = 1920, quality = 0.82) {
 
 const MIN_PHOTOS = 4;
 
-export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
-  const allSites = extraSites.length > 0
-    ? [...extraSites].sort((a, b) => a.localeCompare(b))
-    : JOB_SITES;
+export default function DailyReportForm({ lang: t = {}, onSubmitted, extraSites = [], employees: employeesProp = [] }) {
+  const allSites     = extraSites.length > 0    ? [...extraSites].sort((a, b) => a.localeCompare(b)) : JOB_SITES;
+  const allEmployees = employeesProp.length > 0 ? employeesProp : EMPLOYEES;
+
   const [employee, setEmployee] = useState('');
   const [site, setSite] = useState('');
   const [notes, setNotes] = useState('');
@@ -42,6 +42,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [error, setError] = useState('');
+  const [uploadWarning, setUploadWarning] = useState('');
   const fileInputRef = useRef();
 
   const handleFileChange = (e) => {
@@ -50,7 +51,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
     const added = files.map(file => ({
       file,
       preview: URL.createObjectURL(file),
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     }));
     setPhotos(prev => [...prev, ...added]);
     e.target.value = '';
@@ -66,43 +67,62 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
 
   const handleSubmit = async () => {
     setError('');
-    if (!employee && !site) {
-      setError('Please select an employee and job site.');
-      return;
-    }
-    if (!employee) {
-      setError('Please select your name.');
-      return;
-    }
-    if (!site) {
-      setError('Please select a job site.');
-      return;
-    }
+    setUploadWarning('');
+
+    if (!employee) { setError(t.required || 'Please select your name.'); return; }
+    if (!site)     { setError(t.required || 'Please select a job site.'); return; }
     if (photos.length < MIN_PHOTOS) {
-      setError(`${photos.length} photo${photos.length === 1 ? '' : 's'} added — at least ${MIN_PHOTOS} are required.`);
+      const min = t.reportMinPhotos || 'at least';
+      const req = t.reportMinPhotosRequired || 'required';
+      setError(`${photos.length}/${MIN_PHOTOS} — ${min} ${MIN_PHOTOS} ${req}.`);
       return;
     }
 
     setSubmitting(true);
     setProgress({ done: 0, total: photos.length });
 
+    const photoUrls = [];
+    let uploadFailed = 0;
+
+    for (const p of photos) {
+      let url = null;
+      // 2 attempts per photo before giving up
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const compressed = await compressImage(p.file);
+          const result = await uploadReportPhoto(compressed, site, employee);
+          url = result.url;
+          break;
+        } catch {
+          // retry on first failure, skip on second
+        }
+      }
+      if (url) {
+        photoUrls.push(url);
+      } else {
+        uploadFailed++;
+      }
+      setProgress(prev => ({ ...prev, done: prev.done + 1 }));
+    }
+
+    if (photoUrls.length === 0) {
+      setError(t.reportAllFailed || 'All photos failed to upload. Check your connection and try again.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      let done = 0;
-      const urlPromises = photos.map(async (p) => {
-        const compressed = await compressImage(p.file);
-        const result = await uploadReportPhoto(compressed, site, employee);
-        done++;
-        setProgress({ done, total: photos.length });
-        return result.url;
-      });
-      const photoUrls = await Promise.all(urlPromises);
-
       const report = await createReport({ employeeName: employee, jobSite: site, notes, photoUrls });
-
       photos.forEach(p => URL.revokeObjectURL(p.preview));
+
+      if (uploadFailed > 0) {
+        const warnMsg = t.reportUploadPartialFail || 'photo(s) could not be uploaded — report submitted with the rest.';
+        report._uploadWarning = `${uploadFailed} ${warnMsg}`;
+      }
+
       onSubmitted(report);
-    } catch (err) {
-      setError('Submission failed. Please check your connection and try again.');
+    } catch {
+      setError(t.errorMsg || 'Submission failed. Please check your connection and try again.');
       setSubmitting(false);
     }
   };
@@ -113,29 +133,29 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
   return (
     <div className={styles.form}>
       <div className={styles.field}>
-        <label className={styles.label}>Employee</label>
+        <label className={styles.label}>{t.reportEmployee || 'Employee'}</label>
         <select
           className={styles.select}
           value={employee}
           onChange={e => setEmployee(e.target.value)}
           disabled={submitting}
         >
-          <option value="">Select name...</option>
-          {EMPLOYEES.map(name => (
+          <option value="">{t.selectName || 'Select name...'}</option>
+          {allEmployees.map(name => (
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Job Site</label>
+        <label className={styles.label}>{t.reportSite || 'Job Site'}</label>
         <select
           className={styles.select}
           value={site}
           onChange={e => setSite(e.target.value)}
           disabled={submitting}
         >
-          <option value="">Select site...</option>
+          <option value="">{t.selectSite || 'Select site...'}</option>
           {allSites.map(s => (
             <option key={s} value={s}>{s}</option>
           ))}
@@ -144,7 +164,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
 
       <div className={styles.photoSection}>
         <div className={styles.photoHeader}>
-          <label className={styles.label}>Photos</label>
+          <label className={styles.label}>{t.reportPhotos || 'Photos'}</label>
           <span className={`${styles.photoBadge} ${photosBadgeOk ? styles.badgeOk : ''}`}>
             {photos.length} / {MIN_PHOTOS} min
           </span>
@@ -173,6 +193,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
           type="file"
           accept="image/*"
           multiple
+          capture="environment"
           onChange={handleFileChange}
           className={styles.hiddenInput}
           disabled={submitting}
@@ -182,19 +203,19 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
           onClick={() => fileInputRef.current.click()}
           disabled={submitting}
         >
-          + Add Photos
+          {t.reportAddPhotos || '+ Add Photos'}
         </button>
       </div>
 
       <div className={styles.field}>
         <label className={styles.label}>
-          Notes <span className={styles.optional}>(optional)</span>
+          {t.notes || 'Notes'} <span className={styles.optional}>(optional)</span>
         </label>
         <textarea
           className={styles.textarea}
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          placeholder="Work completed, progress updates, issues from the field..."
+          placeholder={t.reportNotesPlaceholder || 'Work completed, progress updates, issues from the field...'}
           rows={4}
           disabled={submitting}
         />
@@ -208,7 +229,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
             <div className={styles.progressFill} style={{ width: `${pct}%` }} />
           </div>
           <p className={styles.progressText}>
-            Uploading {progress.done} of {progress.total} photos...
+            {t.reportUploadProgress || 'Uploading photos…'} {progress.done}/{progress.total}
           </p>
         </div>
       )}
@@ -218,7 +239,7 @@ export default function DailyReportForm({ onSubmitted, extraSites = [] }) {
         onClick={handleSubmit}
         disabled={submitting}
       >
-        {submitting ? 'Submitting...' : 'Submit Report'}
+        {submitting ? (t.reportSubmitting || 'Submitting…') : (t.reportSubmit || 'Submit Report')}
       </button>
     </div>
   );

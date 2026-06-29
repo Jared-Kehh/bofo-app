@@ -340,6 +340,97 @@ app.delete('/api/locations/:id', async (req, res) => {
   }
 });
 
+// ── Generic name-only list routes ─────────────────────────────────────────
+
+function nameListRoutes(table, routeBase) {
+  app.get(`/api/${routeBase}`, async (req, res) => {
+    try {
+      const { data, error } = await supabase.from(table).select('*').order('name');
+      if (error) throw error;
+      res.json(data);
+    } catch (err) {
+      console.error(`GET ${routeBase} error:`, err.message);
+      res.status(500).json({ error: `Failed to fetch ${routeBase}` });
+    }
+  });
+
+  app.post(`/api/${routeBase}`, async (req, res) => {
+    const { name } = req.body;
+    if (!name?.trim()) return res.status(400).json({ error: 'Name required' });
+    try {
+      const { data, error } = await supabase
+        .from(table).insert([{ name: name.trim() }]).select().single();
+      if (error) throw error;
+      res.status(201).json(data);
+    } catch (err) {
+      console.error(`POST ${routeBase} error:`, err.message);
+      res.status(500).json({ error: `Failed to add` });
+    }
+  });
+
+  app.delete(`/api/${routeBase}/:id`, async (req, res) => {
+    try {
+      const { error } = await supabase.from(table).delete().eq('id', req.params.id);
+      if (error) throw error;
+      res.status(204).send();
+    } catch (err) {
+      console.error(`DELETE ${routeBase} error:`, err.message);
+      res.status(500).json({ error: `Failed to delete` });
+    }
+  });
+}
+
+nameListRoutes('employees', 'employees');
+nameListRoutes('brands',    'brands');
+nameListRoutes('work_types','work-types');
+nameListRoutes('tools',     'tools');
+nameListRoutes('units',     'units');
+
+// ── Products (brand + work_type + name) ──────────────────────────────────
+
+app.get('/api/products', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('brand').order('work_type').order('name');
+    if (error) throw error;
+    res.json(data.map(p => ({ id: p.id, brand: p.brand, workType: p.work_type, name: p.name })));
+  } catch (err) {
+    console.error('GET products error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  const { brand, workType, name } = req.body;
+  if (!brand?.trim() || !workType?.trim() || !name?.trim()) {
+    return res.status(400).json({ error: 'brand, workType, and name are required' });
+  }
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{ brand: brand.trim(), work_type: workType.trim(), name: name.trim() }])
+      .select().single();
+    if (error) throw error;
+    res.status(201).json({ id: data.id, brand: data.brand, workType: data.work_type, name: data.name });
+  } catch (err) {
+    console.error('POST products error:', err.message);
+    res.status(500).json({ error: 'Failed to add product' });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { error } = await supabase.from('products').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.status(204).send();
+  } catch (err) {
+    console.error('DELETE products error:', err.message);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Bofo server running on http://localhost:${PORT}`);
 });

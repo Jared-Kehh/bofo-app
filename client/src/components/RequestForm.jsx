@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { EMPLOYEES, JOB_SITES, BRANDS, WORK_TYPES, PRODUCTS_BY_BRAND_AND_TYPE, UNITS } from '../constants';
+import { EMPLOYEES, JOB_SITES, BRANDS, WORK_TYPES, PRODUCTS_BY_BRAND_AND_TYPE, UNITS, TOOLS } from '../constants';
 import { createSubmission } from '../api';
 import s from './RequestForm.module.css';
 
 function QuantityStepper({ value, onChange }) {
   const num = parseInt(value, 10);
-  const decrement = () => {
-    if (num > 1) onChange(String(num - 1));
-  };
+  const decrement = () => { if (num > 1) onChange(String(num - 1)); };
   const increment = () => onChange(String((isNaN(num) ? 0 : num) + 1));
   const handleChange = (e) => {
     const v = e.target.value;
@@ -29,15 +27,47 @@ function QuantityStepper({ value, onChange }) {
   );
 }
 
-export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
-  const allSites = extraSites.length > 0
-    ? [...extraSites].sort((a, b) => a.localeCompare(b))
-    : JOB_SITES;
+export default function RequestForm({
+  lang: t,
+  onSubmitted,
+  extraSites = [],
+  employees = [],
+  brands = [],
+  workTypes = [],
+  products = [],   // flat array: { id, brand, workType, name }
+  tools = [],
+  units = [],
+}) {
+  // Fall back to constants when dynamic lists are empty (server unavailable)
+  const allSites      = extraSites.length > 0  ? [...extraSites].sort((a, b) => a.localeCompare(b)) : JOB_SITES;
+  const allEmployees  = employees.length > 0   ? employees  : EMPLOYEES;
+  const allBrands     = brands.length > 0      ? brands     : BRANDS;
+  const allWorkTypes  = workTypes.length > 0   ? workTypes  : WORK_TYPES;
+  const allTools      = tools.length > 0       ? tools      : (t.tools || TOOLS);
+  const allUnits      = units.length > 0       ? units      : UNITS;
+
+  // Derive available work types and products for a selected brand
+  const getAvailableWorkTypes = (brand) => {
+    if (!brand) return [];
+    if (products.length > 0) {
+      return [...new Set(products.filter(p => p.brand === brand).map(p => p.workType))].filter(Boolean).sort();
+    }
+    return allWorkTypes.filter(wt => (PRODUCTS_BY_BRAND_AND_TYPE[brand]?.[wt] || []).length > 0);
+  };
+
+  const getAvailableProducts = (brand, workType) => {
+    if (!brand || !workType) return [];
+    if (products.length > 0) {
+      return products.filter(p => p.brand === brand && p.workType === workType).map(p => p.name).sort();
+    }
+    return PRODUCTS_BY_BRAND_AND_TYPE[brand]?.[workType] || [];
+  };
+
   const [form, setForm] = useState({
     employeeName: '', jobSite: '', requestType: '',
     brand: '', workType: '', product: '', tool: '', description: '',
-    quantity: '', unit: 'Units',
-    neededBy: '', priority: 'normal', notes: ''
+    quantity: '', unit: allUnits[0] || 'Units',
+    neededBy: '', priority: 'normal', notes: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,7 +75,12 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleTypeChange = (val) => {
-    setForm(f => ({ ...f, requestType: val, brand: '', workType: '', product: '', tool: '', description: '', quantity: '', unit: 'Units' }));
+    setForm(f => ({
+      ...f,
+      requestType: val,
+      brand: '', workType: '', product: '', tool: '', description: '',
+      quantity: '', unit: allUnits[0] || 'Units',
+    }));
   };
 
   const handleBrandChange = (val) => {
@@ -64,9 +99,13 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
     setLoading(true);
 
     let details = {};
-    if (form.requestType === 'material') details = { brand: form.brand, workType: form.workType, product: form.product, unit: form.unit };
-    else if (form.requestType === 'tool') details = { tool: form.tool, unit: form.unit };
-    else details = { description: form.description, unit: form.unit };
+    if (form.requestType === 'material') {
+      details = { brand: form.brand, workType: form.workType, product: form.product, unit: form.unit };
+    } else if (form.requestType === 'tool') {
+      details = { tool: form.tool, unit: form.unit };
+    } else {
+      details = { description: form.description, unit: form.unit };
+    }
 
     try {
       const submission = await createSubmission({
@@ -77,7 +116,7 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
         quantity: form.quantity || null,
         neededBy: form.neededBy || null,
         priority: form.priority,
-        notes: form.notes
+        notes: form.notes,
       });
       onSubmitted(submission);
     } catch {
@@ -87,6 +126,9 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
     }
   };
 
+  const availableWorkTypes = getAvailableWorkTypes(form.brand);
+  const availableProducts  = getAvailableProducts(form.brand, form.workType);
+
   return (
     <form className={s.form} onSubmit={handleSubmit} noValidate>
 
@@ -95,7 +137,7 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
         <div className={s.selectWrap}>
           <select value={form.employeeName} onChange={e => set('employeeName', e.target.value)}>
             <option value="">{t.selectName}</option>
-            {EMPLOYEES.map(e => <option key={e}>{e}</option>)}
+            {allEmployees.map(e => <option key={e}>{e}</option>)}
           </select>
         </div>
       </div>
@@ -115,8 +157,8 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
         <div className={s.typeGrid}>
           {[
             { val: 'material', label: t.material },
-            { val: 'tool', label: t.toolType },
-            { val: 'other', label: t.other },
+            { val: 'tool',     label: t.toolType },
+            { val: 'other',    label: t.other },
           ].map(opt => (
             <button
               key={opt.val}
@@ -129,65 +171,40 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
           ))}
         </div>
 
-        {form.requestType === 'material' && (() => {
-          const availableWorkTypes = form.brand
-            ? WORK_TYPES.filter(wt => (PRODUCTS_BY_BRAND_AND_TYPE[form.brand]?.[wt] || []).length > 0)
-            : [];
-          const availableProducts = form.brand && form.workType
-            ? (PRODUCTS_BY_BRAND_AND_TYPE[form.brand]?.[form.workType] || [])
-            : [];
-          return (
-            <div className={s.conditional}>
-              <div>
-                <label className={s.label}>{t.brand}</label>
-                <div className={s.selectWrap}>
-                  <select value={form.brand} onChange={e => handleBrandChange(e.target.value)}>
-                    <option value="">{t.selectBrand}</option>
-                    {BRANDS.map(b => <option key={b}>{b}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className={s.label}>{t.workType}</label>
-                <div className={s.selectWrap}>
-                  <select value={form.workType} onChange={e => handleWorkTypeChange(e.target.value)} disabled={!form.brand}>
-                    <option value="">{form.brand ? t.selectWorkType : t.selectBrand}</option>
-                    {availableWorkTypes.map(wt => <option key={wt}>{wt}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className={s.label}>{t.product}</label>
-                <div className={s.selectWrap}>
-                  <select value={form.product} onChange={e => set('product', e.target.value)} disabled={!form.workType}>
-                    <option value="">{form.workType ? t.selectProduct : t.selectWorkType}</option>
-                    {availableProducts.map(p => <option key={p}>{p}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className={s.label}>{t.quantity}</label>
-                <div className={s.qtyRow}>
-                  <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
-                  <div className={`${s.selectWrap} ${s.unitSelect}`}>
-                    <select value={form.unit} onChange={e => set('unit', e.target.value)}>
-                      {UNITS.map(u => <option key={u}>{u}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
-        {form.requestType === 'tool' && (
+        {form.requestType === 'material' && (
           <div className={s.conditional}>
             <div>
-              <label className={s.label}>{t.tool}</label>
+              <label className={s.label}>{t.brand}</label>
               <div className={s.selectWrap}>
-                <select value={form.tool} onChange={e => set('tool', e.target.value)}>
-                  <option value="">{t.selectTool}</option>
-                  {t.tools.map(tool => <option key={tool}>{tool}</option>)}
+                <select value={form.brand} onChange={e => handleBrandChange(e.target.value)}>
+                  <option value="">{t.selectBrand}</option>
+                  {allBrands.map(b => <option key={b}>{b}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className={s.label}>{t.workType}</label>
+              <div className={s.selectWrap}>
+                <select
+                  value={form.workType}
+                  onChange={e => handleWorkTypeChange(e.target.value)}
+                  disabled={!form.brand}
+                >
+                  <option value="">{form.brand ? t.selectWorkType : t.selectBrand}</option>
+                  {availableWorkTypes.map(wt => <option key={wt}>{wt}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className={s.label}>{t.product}</label>
+              <div className={s.selectWrap}>
+                <select
+                  value={form.product}
+                  onChange={e => set('product', e.target.value)}
+                  disabled={!form.workType}
+                >
+                  <option value="">{form.workType ? t.selectProduct : t.selectWorkType}</option>
+                  {availableProducts.map(p => <option key={p}>{p}</option>)}
                 </select>
               </div>
             </div>
@@ -197,7 +214,32 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
                 <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
                 <div className={`${s.selectWrap} ${s.unitSelect}`}>
                   <select value={form.unit} onChange={e => set('unit', e.target.value)}>
-                    {UNITS.map(u => <option key={u}>{u}</option>)}
+                    {allUnits.map(u => <option key={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {form.requestType === 'tool' && (
+          <div className={s.conditional}>
+            <div>
+              <label className={s.label}>{t.tool}</label>
+              <div className={s.selectWrap}>
+                <select value={form.tool} onChange={e => set('tool', e.target.value)}>
+                  <option value="">{t.selectTool}</option>
+                  {allTools.map(tool => <option key={tool}>{tool}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className={s.label}>{t.quantity}</label>
+              <div className={s.qtyRow}>
+                <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
+                <div className={`${s.selectWrap} ${s.unitSelect}`}>
+                  <select value={form.unit} onChange={e => set('unit', e.target.value)}>
+                    {allUnits.map(u => <option key={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
@@ -209,7 +251,12 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
           <div className={s.conditional}>
             <div>
               <label className={s.label}>{t.describeItem} <span className={s.req}>*</span></label>
-              <input type="text" value={form.description} onChange={e => set('description', e.target.value)} placeholder={t.descPlaceholder} />
+              <input
+                type="text"
+                value={form.description}
+                onChange={e => set('description', e.target.value)}
+                placeholder={t.descPlaceholder}
+              />
             </div>
             <div>
               <label className={s.label}>{t.quantity}</label>
@@ -217,7 +264,7 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
                 <QuantityStepper value={form.quantity} onChange={v => set('quantity', v)} />
                 <div className={`${s.selectWrap} ${s.unitSelect}`}>
                   <select value={form.unit} onChange={e => set('unit', e.target.value)}>
-                    {UNITS.map(u => <option key={u}>{u}</option>)}
+                    {allUnits.map(u => <option key={u}>{u}</option>)}
                   </select>
                 </div>
               </div>
@@ -244,7 +291,12 @@ export default function RequestForm({ lang: t, onSubmitted, extraSites = [] }) {
 
       <div className={s.section}>
         <label className={s.label}>{t.notes}</label>
-        <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder={t.notesPlaceholder} rows={3} />
+        <textarea
+          value={form.notes}
+          onChange={e => set('notes', e.target.value)}
+          placeholder={t.notesPlaceholder}
+          rows={3}
+        />
       </div>
 
       {error && <div className={s.error}>{error}</div>}

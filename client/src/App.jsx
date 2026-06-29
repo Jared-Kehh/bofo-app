@@ -5,9 +5,17 @@ import SuccessScreen from './components/SuccessScreen';
 import AdminDashboard from './components/AdminDashboard';
 import DailyReportForm from './components/DailyReportForm';
 import DailyReportAdmin from './components/DailyReportAdmin';
-import ManageLocations from './components/ManageLocations';
+import ManageAll from './components/ManageAll';
 import PinScreen from './components/PinScreen';
-import { getLocations } from './api';
+import {
+  getLocations,
+  getEmployees,
+  getBrands,
+  getWorkTypes,
+  getProducts,
+  getTools,
+  getUnits,
+} from './api';
 import './App.css';
 
 export default function App() {
@@ -17,15 +25,44 @@ export default function App() {
   const [lastReport, setLastReport] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [reportRefreshKey, setReportRefreshKey] = useState(0);
-  const [adminTab, setAdminTab] = useState('requests'); // 'requests'|'reports'
+  const [adminTab, setAdminTab] = useState('requests'); // 'requests'|'reports'|'manage'
   const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [customLocations, setCustomLocations] = useState([]);
+
+  // All dynamic dropdown data — loaded once on start, refreshed when admin edits
+  const [dropdowns, setDropdowns] = useState({
+    locations: [],
+    employees: [],
+    brands: [],
+    workTypes: [],
+    products: [],
+    tools: [],
+    units: [],
+  });
+  const [dropdownsKey, setDropdownsKey] = useState(0);
 
   const t = LANG[lang];
 
   useEffect(() => {
-    getLocations().then(setCustomLocations).catch(() => {});
-  }, []);
+    Promise.allSettled([
+      getLocations(),
+      getEmployees(),
+      getBrands(),
+      getWorkTypes(),
+      getProducts(),
+      getTools(),
+      getUnits(),
+    ]).then(([locs, emps, brands, wts, prods, tools, units]) => {
+      setDropdowns({
+        locations: locs.status === 'fulfilled'  ? locs.value   : [],
+        employees: emps.status === 'fulfilled'  ? emps.value   : [],
+        brands:    brands.status === 'fulfilled' ? brands.value : [],
+        workTypes: wts.status === 'fulfilled'   ? wts.value    : [],
+        products:  prods.status === 'fulfilled' ? prods.value  : [],
+        tools:     tools.status === 'fulfilled' ? tools.value  : [],
+        units:     units.status === 'fulfilled' ? units.value  : [],
+      });
+    });
+  }, [dropdownsKey]);
 
   const handleSubmitted = (submission) => {
     setLastSubmission(submission);
@@ -62,7 +99,7 @@ export default function App() {
   const isPinView = view === 'pin';
   const isAdminView = view === 'admin';
 
-  const isFormActive = view === 'form' || view === 'success';
+  const isFormActive   = view === 'form'   || view === 'success';
   const isReportActive = view === 'report' || view === 'reportSuccess';
 
   const pageTitle =
@@ -76,6 +113,14 @@ export default function App() {
     : view === 'report' ? t.reportSub
     : view === 'success' || view === 'reportSuccess' ? ''
     : t.formSub;
+
+  // Convenience derived arrays for passing to forms
+  const siteNames     = dropdowns.locations.map(l => l.name);
+  const employeeNames = dropdowns.employees.map(e => e.name);
+  const brandNames    = dropdowns.brands.map(b => b.name);
+  const workTypeNames = dropdowns.workTypes.map(w => w.name);
+  const toolNames     = dropdowns.tools.map(t => t.name);
+  const unitNames     = dropdowns.units.map(u => u.name);
 
   return (
     <div className="app">
@@ -95,13 +140,13 @@ export default function App() {
         )}
         {!isPinView && (
           <nav className="nav">
-            <button className={"navBtn" + (isFormActive ? ' navActive' : '')} onClick={() => goTo('form')}>
+            <button className={"navBtn" + (isFormActive   ? ' navActive' : '')} onClick={() => goTo('form')}>
               {t.navForm}
             </button>
             <button className={"navBtn" + (isReportActive ? ' navActive' : '')} onClick={() => goTo('report')}>
               {t.navReport}
             </button>
-            <button className={"navBtn" + (isAdminView ? ' navActive' : '')} onClick={goToAdmin}>
+            <button className={"navBtn" + (isAdminView    ? ' navActive' : '')} onClick={goToAdmin}>
               {t.navAdmin}
             </button>
           </nav>
@@ -110,14 +155,32 @@ export default function App() {
 
       <main className="main">
         {view === 'form' && (
-          <RequestForm lang={t} onSubmitted={handleSubmitted} extraSites={customLocations.map(c => c.name)} />
+          <RequestForm
+            lang={t}
+            onSubmitted={handleSubmitted}
+            extraSites={siteNames}
+            employees={employeeNames}
+            brands={brandNames}
+            workTypes={workTypeNames}
+            products={dropdowns.products}
+            tools={toolNames}
+            units={unitNames}
+          />
         )}
+
         {view === 'success' && lastSubmission && (
           <SuccessScreen lang={t} submission={lastSubmission} onReset={() => goTo('form')} />
         )}
+
         {view === 'report' && (
-          <DailyReportForm onSubmitted={handleReportSubmitted} extraSites={customLocations.map(c => c.name)} />
+          <DailyReportForm
+            lang={t}
+            onSubmitted={handleReportSubmitted}
+            extraSites={siteNames}
+            employees={employeeNames}
+          />
         )}
+
         {view === 'reportSuccess' && (
           <div className="reportSuccess">
             <div className="rsIcon">
@@ -152,9 +215,11 @@ export default function App() {
             <button className="rsResetBtn" onClick={() => goTo('report')}>{t.newReport}</button>
           </div>
         )}
+
         {isPinView && (
           <PinScreen lang={t} onUnlock={handlePinUnlock} onBack={() => goTo('form')} />
         )}
+
         {isAdminView && (
           <div className="adminArea">
             <div className="adminTabs">
@@ -171,23 +236,37 @@ export default function App() {
                 {t.adminReportsTab}
               </button>
               <button
-                className={"adminTabBtn" + (adminTab === 'locations' ? ' adminTabActive' : '')}
-                onClick={() => setAdminTab('locations')}
+                className={"adminTabBtn" + (adminTab === 'manage' ? ' adminTabActive' : '')}
+                onClick={() => setAdminTab('manage')}
               >
                 {t.adminLocationsTab}
               </button>
             </div>
-            {adminTab === 'requests' && <AdminDashboard lang={t} refreshKey={refreshKey} sites={customLocations.map(c => c.name)} />}
-            {adminTab === 'reports'  && <DailyReportAdmin lang={t} refreshKey={reportRefreshKey} sites={customLocations.map(c => c.name)} />}
-            {adminTab === 'locations' && (
-              <ManageLocations
-                onLocationsChange={setCustomLocations}
+
+            {adminTab === 'requests' && (
+              <AdminDashboard
+                lang={t}
+                refreshKey={refreshKey}
+                sites={siteNames}
+              />
+            )}
+            {adminTab === 'reports' && (
+              <DailyReportAdmin
+                lang={t}
+                refreshKey={reportRefreshKey}
+                sites={siteNames}
+              />
+            )}
+            {adminTab === 'manage' && (
+              <ManageAll
+                lang={t}
+                onLocationsChange={(locs) => setDropdowns(d => ({ ...d, locations: locs }))}
+                onChanged={() => setDropdownsKey(k => k + 1)}
               />
             )}
           </div>
         )}
       </main>
-
     </div>
   );
 }

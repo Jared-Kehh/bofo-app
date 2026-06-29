@@ -60,6 +60,21 @@
 .search:focus { border-color: var(--gray-900); }
 .search::placeholder { color: var(--gray-400); }
 
+.filterDate {
+  width: 100%;
+  padding: 8px 10px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-family: 'Geist', sans-serif;
+  background: var(--white);
+  color: var(--gray-700);
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+.filterDate:focus { border-color: var(--gray-900); }
+
 .filterRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

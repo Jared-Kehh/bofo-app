@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { JOB_SITES } from '../constants';
 import { getSubmissions, updateStatus as apiUpdateStatus, deleteSubmission as apiDeleteSubmission } from '../api';
-
 import s from './AdminDashboard.module.css';
 
 const STATUS_LABELS = { Pending: 'pending', Approved: 'approved', Completed: 'completed' };
@@ -30,6 +29,9 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterSite, setFilterSite] = useState('');
+  const [filterEmployee, setFilterEmployee] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [updating, setUpdating] = useState(null);
   const [deleting, setDeleting] = useState(null);
 
@@ -46,7 +48,7 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
     try {
       await apiDeleteSubmission(id);
       setSubmissions(prev => prev.filter(x => x.id !== id));
-    } catch (err) {
+    } catch {
       alert('Failed to delete submission. Please try again.');
     } finally {
       setDeleting(null);
@@ -64,29 +66,40 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
   };
 
   const stats = useMemo(() => ({
-    total: submissions.length,
-    pending: submissions.filter(s => s.status === 'Pending').length,
-    approved: submissions.filter(s => s.status === 'Approved').length,
+    total:     submissions.length,
+    pending:   submissions.filter(s => s.status === 'Pending').length,
+    approved:  submissions.filter(s => s.status === 'Approved').length,
     completed: submissions.filter(s => s.status === 'Completed').length,
   }), [submissions]);
 
+  const uniqueEmployees = useMemo(
+    () => [...new Set(submissions.map(s => s.employeeName))].sort(),
+    [submissions]
+  );
+
   const filtered = useMemo(() => submissions.filter(sub => {
     const q = search.toLowerCase();
-    const matchSearch = !q || sub.employeeName.toLowerCase().includes(q) || sub.jobSite.toLowerCase().includes(q);
-    const matchStatus = !filterStatus || sub.status === filterStatus;
-    const matchSite = !filterSite || sub.jobSite === filterSite;
-    return matchSearch && matchStatus && matchSite;
-  }), [submissions, search, filterStatus, filterSite]);
+    if (q && !sub.employeeName.toLowerCase().includes(q) && !sub.jobSite.toLowerCase().includes(q)) return false;
+    if (filterStatus   && sub.status      !== filterStatus)   return false;
+    if (filterSite     && sub.jobSite     !== filterSite)     return false;
+    if (filterEmployee && sub.employeeName !== filterEmployee) return false;
+    if (filterType     && sub.requestType  !== filterType)    return false;
+    if (filterDate) {
+      const subDate = new Date(sub.timestamp).toLocaleDateString('en-CA');
+      if (subDate !== filterDate) return false;
+    }
+    return true;
+  }), [submissions, search, filterStatus, filterSite, filterEmployee, filterType, filterDate]);
 
   return (
     <div className={s.dashboard}>
 
       <div className={s.stats}>
         {[
-          { label: t.totalSubmissions, val: stats.total, cls: '' },
-          { label: t.pendingCount, val: stats.pending, cls: s.statPending },
-          { label: t.approvedCount, val: stats.approved, cls: s.statApproved },
-          { label: t.completedCount, val: stats.completed, cls: s.statCompleted },
+          { label: t.totalSubmissions, val: stats.total,     cls: '' },
+          { label: t.pendingCount,     val: stats.pending,   cls: s.statPending },
+          { label: t.approvedCount,    val: stats.approved,  cls: s.statApproved },
+          { label: t.completedCount,   val: stats.completed, cls: s.statCompleted },
         ].map(({ label, val, cls }) => (
           <div className={`${s.stat} ${cls}`} key={label}>
             <span className={s.statVal}>{val}</span>
@@ -103,6 +116,8 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+
+        {/* Row 1: status + site */}
         <div className={s.filterRow}>
           <div className={s.selectWrap}>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
@@ -115,16 +130,46 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
           <div className={s.selectWrap}>
             <select value={filterSite} onChange={e => setFilterSite(e.target.value)}>
               <option value="">{t.allSites}</option>
-              {[...sites].sort((a, b) => a.localeCompare(b)).map(site => <option key={site}>{site}</option>)}
+              {[...sites].sort((a, b) => a.localeCompare(b)).map(site => (
+                <option key={site}>{site}</option>
+              ))}
             </select>
           </div>
         </div>
+
+        {/* Row 2: employee + request type */}
+        <div className={s.filterRow}>
+          <div className={s.selectWrap}>
+            <select value={filterEmployee} onChange={e => setFilterEmployee(e.target.value)}>
+              <option value="">{t.allEmployees || 'All employees'}</option>
+              {uniqueEmployees.map(emp => <option key={emp}>{emp}</option>)}
+            </select>
+          </div>
+          <div className={s.selectWrap}>
+            <select value={filterType} onChange={e => setFilterType(e.target.value)}>
+              <option value="">{t.allTypes || 'All types'}</option>
+              <option value="material">{t.typeMaterial || 'Material'}</option>
+              <option value="tool">{t.typeTool || 'Tool'}</option>
+              <option value="other">{t.typeOther || 'Other'}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Row 3: date */}
+        <input
+          type="date"
+          className={s.filterDate}
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+        />
       </div>
 
       {loading && <div className={s.empty}>Loading...</div>}
 
       {!loading && filtered.length === 0 && (
-        <div className={s.empty}>{submissions.length === 0 ? t.adminEmpty : 'No results match your filters.'}</div>
+        <div className={s.empty}>
+          {submissions.length === 0 ? t.adminEmpty : 'No results match your filters.'}
+        </div>
       )}
 
       {!loading && filtered.length > 0 && (
@@ -156,7 +201,7 @@ export default function AdminDashboard({ lang: t, refreshKey, sites = JOB_SITES 
                     <span className={s.metaVal}>{formatQty(sub)}</span>
                   </div>
                 )}
-                {sub.priority && sub.priority === 'urgent' && (
+                {sub.priority === 'urgent' && (
                   <div className={s.metaRow}>
                     <span className={s.metaLabel}>{t.priority}</span>
                     <span className={s.urgentBadge}>{t.priorityUrgent}</span>
