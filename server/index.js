@@ -5,6 +5,8 @@ const multer = require('multer');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
+const { sendSubmissionEmail, sendReportEmail } = require('./notifications');
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -84,8 +86,9 @@ app.post('/api/submissions', async (req, res) => {
 
     if (error) throw error;
 
-    // Return in camelCase format the frontend expects
-    res.status(201).json(mapRow(data));
+    const mapped = mapRow(data);
+    res.status(201).json(mapped);
+    sendSubmissionEmail(mapped); // fire-and-forget
   } catch (err) {
     console.error('POST error:', err.message);
     res.status(500).json({ error: 'Failed to create submission' });
@@ -209,7 +212,10 @@ app.post('/api/reports', async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.status(201).json(mapReport(data));
+
+    const mapped = mapReport(data);
+    res.status(201).json(mapped);
+    sendReportEmail(mapped); // fire-and-forget
   } catch (err) {
     console.error('POST report error:', err.message);
     res.status(500).json({ error: 'Failed to create report' });
